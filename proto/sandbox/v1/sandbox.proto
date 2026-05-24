@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package sandbox.v1;
+
+import "buf/validate/validate.proto";
+
+service SandboxService {
+  rpc StartSandbox(StartSandboxRequest) returns (StartSandboxResponse);
+  rpc GetSandbox(GetSandboxRequest) returns (GetSandboxResponse);
+  rpc StopSandbox(StopSandboxRequest) returns (StopSandboxResponse);
+  // Aditional APIs
+  rpc ListSandbox(ListSandboxRequest) returns (ListSandboxResponse);
+
+  rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
+
+  rpc OpenPort(OpenPortRequest) returns (OpenPortResponse);
+  rpc ClosePort(ClosePortRequest) returns (ClosePortResponse);
+  // Aditional APIs
+  rpc ListOpenPort(ListOpenPortRequest) returns (ListOpenPortResponse);
+}
+
+message StartSandboxRequest {
+  string image = 1 [(buf.validate.field).required = true];
+  Specification requirement = 2 [(buf.validate.field).required = true];
+}
+
+message StartSandboxResponse {
+  SandboxInfo sandbox = 1;
+}
+
+message GetSandboxRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message GetSandboxResponse {
+  SandboxInfo sandbox = 1;
+}
+
+message StopSandboxRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message StopSandboxResponse {
+  SandboxInfo sandbox = 1;
+}
+
+message ListSandboxRequest {}
+
+message ListSandboxResponse {
+  repeated SandboxInfo sandboxs = 1;
+}
+
+message SendCommandRequest {
+  string id = 1 [(buf.validate.field).required = true];
+  // bool streaming = 2;
+}
+
+message SendCommandResponse {
+  string result = 1;
+}
+
+message OpenPortRequest {
+  string id = 1 [(buf.validate.field).required = true];
+  int32 port = 2 [(buf.validate.field).required = true];
+}
+
+message OpenPortResponse {
+  PortInfo port = 1;
+}
+
+message ClosePortRequest {
+  string id = 1 [(buf.validate.field).required = true];
+  int32 port = 2 [(buf.validate.field).required = true];
+}
+
+message ClosePortResponse {
+  PortInfo port = 1;
+}
+
+message ListOpenPortRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message ListOpenPortResponse {
+  repeated PortInfo ports = 1;
+}
+
+message PortInfo {
+  int32 port = 1;
+  string url = 2;
+  PortStatus status = 3;
+}
+
+message SandboxInfo {
+  string id = 1;
+  SandboxStatus status = 2;
+  string url = 3;
+}
+
+enum SandboxStatus {
+  SANDBOX_STATUS_UNSPECIFIED = 0;
+  SANDBOX_STATUS_STARTING = 1;
+  SANDBOX_STATUS_RUNNING = 2;
+  SANDBOX_STATUS_STOPPING = 3;
+  SANDBOX_STATUS_STOPPED = 4;
+  SANDBOX_STATUS_ERROR = 5;
+}
+
+enum PortStatus {
+  PORT_STATUS_UNSPECIFIED = 0;
+  PORT_STATUS_OPEN = 1;
+  PORT_STATUS_CLOSED = 2;
+}
+
+message Specification {
+  // In millicore
+  uint32 cpu = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).uint32 = {
+      gt: 0
+      lte: 4000 // 4 CPU
+    }
+  ];
+  // In MB
+  uint32 memory = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).uint32 = {
+      gt: 0
+      lte: 8192 // 8GB
+    }
+  ];
+  // In GB
+  uint32 storage = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).uint32 = {
+      gt: 1
+      lte: 102400 // 100GB
+    }
+  ];
+}
