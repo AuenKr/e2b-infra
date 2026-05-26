@@ -572,7 +572,7 @@ func (x *SendCommandResponse) GetResult() string {
 type OpenPortRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Port          int32                  `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	Port          uint32                 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -614,7 +614,7 @@ func (x *OpenPortRequest) GetId() string {
 	return ""
 }
 
-func (x *OpenPortRequest) GetPort() int32 {
+func (x *OpenPortRequest) GetPort() uint32 {
 	if x != nil {
 		return x.Port
 	}
@@ -851,7 +851,7 @@ func (x *ListOpenPortResponse) GetPorts() []*PortInfo {
 
 type PortInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Port          int32                  `protobuf:"varint,1,opt,name=port,proto3" json:"port,omitempty"`
+	Port          uint32                 `protobuf:"varint,1,opt,name=port,proto3" json:"port,omitempty"`
 	Url           string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
 	Status        PortStatus             `protobuf:"varint,3,opt,name=status,proto3,enum=sandbox.v1.PortStatus" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -888,7 +888,7 @@ func (*PortInfo) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *PortInfo) GetPort() int32 {
+func (x *PortInfo) GetPort() uint32 {
 	if x != nil {
 		return x.Port
 	}
@@ -1057,10 +1057,10 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x12SendCommandRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"-\n" +
 	"\x13SendCommandResponse\x12\x16\n" +
-	"\x06result\x18\x01 \x01(\tR\x06result\"E\n" +
+	"\x06result\x18\x01 \x01(\tR\x06result\"M\n" +
 	"\x0fOpenPortRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\x1a\n" +
-	"\x04port\x18\x02 \x01(\x05B\x06\xbaH\x03\xc8\x01\x01R\x04port\"<\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\"\n" +
+	"\x04port\x18\x02 \x01(\rB\x0e\xbaH\v\xc8\x01\x01*\x06\x18\xff\xff\x03 \x00R\x04port\"<\n" +
 	"\x10OpenPortResponse\x12(\n" +
 	"\x04port\x18\x01 \x01(\v2\x14.sandbox.v1.PortInfoR\x04port\"F\n" +
 	"\x10ClosePortRequest\x12\x16\n" +
@@ -1071,10 +1071,10 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x13ListOpenPortRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"B\n" +
 	"\x14ListOpenPortResponse\x12*\n" +
-	"\x05ports\x18\x01 \x03(\v2\x14.sandbox.v1.PortInfoR\x05ports\"`\n" +
-	"\bPortInfo\x12\x12\n" +
-	"\x04port\x18\x01 \x01(\x05R\x04port\x12\x10\n" +
-	"\x03url\x18\x02 \x01(\tR\x03url\x12.\n" +
+	"\x05ports\x18\x01 \x03(\v2\x14.sandbox.v1.PortInfoR\x05ports\"w\n" +
+	"\bPortInfo\x12\x1f\n" +
+	"\x04port\x18\x01 \x01(\rB\v\xbaH\b*\x06\x18\xff\xff\x03 \x00R\x04port\x12\x1a\n" +
+	"\x03url\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x88\x01\x01R\x03url\x12.\n" +
 	"\x06status\x18\x03 \x01(\x0e2\x16.sandbox.v1.PortStatusR\x06status\"b\n" +
 	"\vSandboxInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x121\n" +

@@ -47,40 +47,48 @@ type SandboxServer struct {
 
 // StartSandbox implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) StartSandbox(context.Context, *sandboxv1.StartSandboxRequest) (*sandboxv1.StartSandboxResponse, error) {
+	// Start the pod with given image
 	panic("unimplemented")
 }
 
 // StopSandbox implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) StopSandbox(context.Context, *sandboxv1.StopSandboxRequest) (*sandboxv1.StopSandboxResponse, error) {
+	// Stop the pod
 	panic("unimplemented")
 }
 
 // GetSandbox implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) GetSandbox(context.Context, *sandboxv1.GetSandboxRequest) (*sandboxv1.GetSandboxResponse, error) {
+	// Get pod details
 	panic("unimplemented")
 }
 
 // ListSandbox implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) ListSandbox(context.Context, *sandboxv1.ListSandboxRequest) (*sandboxv1.ListSandboxResponse, error) {
+	// Get user pods
 	panic("unimplemented")
 }
 
 // SendCommand implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) SendCommand(context.Context, *sandboxv1.SendCommandRequest) (*sandboxv1.SendCommandResponse, error) {
+	// Send Exec cmd to pod
 	panic("unimplemented")
 }
 
 // OpenPort implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) OpenPort(context.Context, *sandboxv1.OpenPortRequest) (*sandboxv1.OpenPortResponse, error) {
+	// Create a service to pod with that open port
 	panic("unimplemented")
 }
 
 // ClosePort implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) ClosePort(context.Context, *sandboxv1.ClosePortRequest) (*sandboxv1.ClosePortResponse, error) {
+	// Close the open port in the service for that pod
 	panic("unimplemented")
 }
 
 // ListOpenPort implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) ListOpenPort(context.Context, *sandboxv1.ListOpenPortRequest) (*sandboxv1.ListOpenPortResponse, error) {
+	// Read the service for that pod and get its open ports
 	panic("unimplemented")
 }

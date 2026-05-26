@@ -61,7 +61,13 @@ message SendCommandResponse {
 
 message OpenPortRequest {
   string id = 1 [(buf.validate.field).required = true];
-  int32 port = 2 [(buf.validate.field).required = true];
+  uint32 port = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).uint32 = {
+      gt: 0
+      lte: 65535
+    }
+  ];
 }
 
 message OpenPortResponse {
@@ -86,8 +92,11 @@ message ListOpenPortResponse {
 }
 
 message PortInfo {
-  int32 port = 1;
-  string url = 2;
+  uint32 port = 1 [(buf.validate.field).uint32 = {
+    gt: 0
+    lte: 65535
+  }];
+  string url = 2 [(buf.validate.field).string.uri = true];
   PortStatus status = 3;
 }
 
