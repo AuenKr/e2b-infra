@@ -7,19 +7,35 @@ import (
 	sandboxv1 "e2b/gen/sandbox/v1"
 	"e2b/gen/sandbox/v1/sandboxv1connect"
 	"e2b/pkg/config"
+	"e2b/pkg/server"
 
+	"connectrpc.com/connect"
+	"connectrpc.com/validate"
 	"go.uber.org/fx"
 )
 
 type SandboxServerParams struct {
 	fx.In
-	config config.Config
+	Config config.Config
 }
 
 func NewSandboxServer(in SandboxServerParams) *SandboxServer {
 	return &SandboxServer{
-		config: in.config,
+		config: in.Config,
 	}
+}
+
+type SandboxServerRouteParams struct {
+	fx.In
+	Server *SandboxServer
+}
+
+func NewSandboxServerRoute(in SandboxServerRouteParams) server.Route {
+	p, h := sandboxv1connect.NewSandboxServiceHandler(
+		in.Server,
+		connect.WithInterceptors(validate.NewInterceptor()),
+	)
+	return server.Route{Path: p, Handler: h}
 }
 
 // For compile time error
