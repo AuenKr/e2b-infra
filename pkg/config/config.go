@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	Mode string
-	Port int
+	Mode          string
+	Port          int
+	K8sConfigPath string
 }
 
 func NewConfig() Config {
@@ -22,10 +23,12 @@ func NewConfig() Config {
 	}
 
 	Mode := getEnv("MODE", "dev")
+	K8sConfigPath := getEnv("K8S_CONFIG_PATH", "")
 
 	return Config{
-		Port: port,
-		Mode: Mode,
+		Port:          port,
+		Mode:          Mode,
+		K8sConfigPath: K8sConfigPath,
 	}
 }
 

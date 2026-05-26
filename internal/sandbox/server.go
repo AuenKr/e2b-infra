@@ -12,6 +12,7 @@ import (
 	"connectrpc.com/connect"
 	"connectrpc.com/validate"
 	"go.uber.org/fx"
+	"k8s.io/client-go/kubernetes"
 )
 
 type SandboxServerParams struct {
@@ -27,7 +28,8 @@ func NewSandboxServer(in SandboxServerParams) *SandboxServer {
 
 type SandboxServerRouteParams struct {
 	fx.In
-	Server *SandboxServer
+	Server    *SandboxServer
+	K8sClient *kubernetes.Clientset
 }
 
 func NewSandboxServerRoute(in SandboxServerRouteParams) server.Route {
