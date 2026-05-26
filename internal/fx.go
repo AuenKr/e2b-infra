@@ -1,7 +1,7 @@
-// Package internalfx: Internal module for the server.
 package internalfx
 
 import (
+	"e2b/internal/reflection"
 	"e2b/internal/sandbox"
 	"e2b/internal/server"
 
@@ -16,7 +16,14 @@ var Module = fx.Module(
 			sandbox.NewSandboxServerRoute,
 			fx.ResultTags(`group:"grpc-routes"`),
 		),
+		fx.Annotate(
+			reflection.NewReflectionRouteV1,
+			fx.ResultTags(`group:"grpc-routes"`),
+		),
+		fx.Annotate(
+			reflection.NewReflectionRouteV1Alpha,
+			fx.ResultTags(`group:"grpc-routes"`),
+		),
 	),
-	fx.Provide(server.NewHTTPMux),
-	fx.Decorate(server.RegisterRoutes),
+	fx.Provide(server.NewServerMux),
 )

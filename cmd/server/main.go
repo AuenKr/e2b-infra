@@ -16,6 +16,11 @@ func main() {
 	app := fx.New(
 		internalfx.Module,
 		pkgfx.Module,
+
+		// NOTE: Decorator
+		// Decorator inside the module does not work
+		// Need to be present at root level of project
+
 		fx.Invoke(StartHTTPServer),
 	)
 	app.Run()
@@ -33,6 +38,9 @@ func StartHTTPServer(in StartHTTPServerParams) error {
 		Addr:    fmt.Sprintf(":%d", in.Config.Port),
 		Handler: in.Mux,
 	}
+	server.Protocols = new(http.Protocols)
+	server.Protocols.SetHTTP1(true)
+	server.Protocols.SetUnencryptedHTTP2(true)
 
 	in.LifeCycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
