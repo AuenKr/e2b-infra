@@ -36,12 +36,12 @@ const (
 	// SandboxServiceStartSandboxProcedure is the fully-qualified name of the SandboxService's
 	// StartSandbox RPC.
 	SandboxServiceStartSandboxProcedure = "/sandbox.v1.SandboxService/StartSandbox"
-	// SandboxServiceGetSandboxProcedure is the fully-qualified name of the SandboxService's GetSandbox
-	// RPC.
-	SandboxServiceGetSandboxProcedure = "/sandbox.v1.SandboxService/GetSandbox"
 	// SandboxServiceStopSandboxProcedure is the fully-qualified name of the SandboxService's
 	// StopSandbox RPC.
 	SandboxServiceStopSandboxProcedure = "/sandbox.v1.SandboxService/StopSandbox"
+	// SandboxServiceGetSandboxProcedure is the fully-qualified name of the SandboxService's GetSandbox
+	// RPC.
+	SandboxServiceGetSandboxProcedure = "/sandbox.v1.SandboxService/GetSandbox"
 	// SandboxServiceListSandboxProcedure is the fully-qualified name of the SandboxService's
 	// ListSandbox RPC.
 	SandboxServiceListSandboxProcedure = "/sandbox.v1.SandboxService/ListSandbox"
@@ -60,15 +60,17 @@ const (
 
 // SandboxServiceClient is a client for the sandbox.v1.SandboxService service.
 type SandboxServiceClient interface {
+	// At starting we create all the resources when the standbox is starting
+	// ie pod, service and  HTTP Route with zero port open
 	StartSandbox(context.Context, *v1.StartSandboxRequest) (*v1.StartSandboxResponse, error)
-	GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error)
+	// Done save as above but in reverse order
 	StopSandbox(context.Context, *v1.StopSandboxRequest) (*v1.StopSandboxResponse, error)
-	// Aditional APIs
+	GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error)
 	ListSandbox(context.Context, *v1.ListSandboxRequest) (*v1.ListSandboxResponse, error)
 	SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error)
+	// And when open or close port: get the resource, reconsile it and update on server
 	OpenPort(context.Context, *v1.OpenPortRequest) (*v1.OpenPortResponse, error)
 	ClosePort(context.Context, *v1.ClosePortRequest) (*v1.ClosePortResponse, error)
-	// Aditional APIs
 	ListOpenPort(context.Context, *v1.ListOpenPortRequest) (*v1.ListOpenPortResponse, error)
 }
 
@@ -89,16 +91,16 @@ func NewSandboxServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(sandboxServiceMethods.ByName("StartSandbox")),
 			connect.WithClientOptions(opts...),
 		),
-		getSandbox: connect.NewClient[v1.GetSandboxRequest, v1.GetSandboxResponse](
-			httpClient,
-			baseURL+SandboxServiceGetSandboxProcedure,
-			connect.WithSchema(sandboxServiceMethods.ByName("GetSandbox")),
-			connect.WithClientOptions(opts...),
-		),
 		stopSandbox: connect.NewClient[v1.StopSandboxRequest, v1.StopSandboxResponse](
 			httpClient,
 			baseURL+SandboxServiceStopSandboxProcedure,
 			connect.WithSchema(sandboxServiceMethods.ByName("StopSandbox")),
+			connect.WithClientOptions(opts...),
+		),
+		getSandbox: connect.NewClient[v1.GetSandboxRequest, v1.GetSandboxResponse](
+			httpClient,
+			baseURL+SandboxServiceGetSandboxProcedure,
+			connect.WithSchema(sandboxServiceMethods.ByName("GetSandbox")),
 			connect.WithClientOptions(opts...),
 		),
 		listSandbox: connect.NewClient[v1.ListSandboxRequest, v1.ListSandboxResponse](
@@ -137,8 +139,8 @@ func NewSandboxServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 // sandboxServiceClient implements SandboxServiceClient.
 type sandboxServiceClient struct {
 	startSandbox *connect.Client[v1.StartSandboxRequest, v1.StartSandboxResponse]
-	getSandbox   *connect.Client[v1.GetSandboxRequest, v1.GetSandboxResponse]
 	stopSandbox  *connect.Client[v1.StopSandboxRequest, v1.StopSandboxResponse]
+	getSandbox   *connect.Client[v1.GetSandboxRequest, v1.GetSandboxResponse]
 	listSandbox  *connect.Client[v1.ListSandboxRequest, v1.ListSandboxResponse]
 	sendCommand  *connect.Client[v1.SendCommandRequest, v1.SendCommandResponse]
 	openPort     *connect.Client[v1.OpenPortRequest, v1.OpenPortResponse]
@@ -155,18 +157,18 @@ func (c *sandboxServiceClient) StartSandbox(ctx context.Context, req *v1.StartSa
 	return nil, err
 }
 
-// GetSandbox calls sandbox.v1.SandboxService.GetSandbox.
-func (c *sandboxServiceClient) GetSandbox(ctx context.Context, req *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error) {
-	response, err := c.getSandbox.CallUnary(ctx, connect.NewRequest(req))
+// StopSandbox calls sandbox.v1.SandboxService.StopSandbox.
+func (c *sandboxServiceClient) StopSandbox(ctx context.Context, req *v1.StopSandboxRequest) (*v1.StopSandboxResponse, error) {
+	response, err := c.stopSandbox.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
 	return nil, err
 }
 
-// StopSandbox calls sandbox.v1.SandboxService.StopSandbox.
-func (c *sandboxServiceClient) StopSandbox(ctx context.Context, req *v1.StopSandboxRequest) (*v1.StopSandboxResponse, error) {
-	response, err := c.stopSandbox.CallUnary(ctx, connect.NewRequest(req))
+// GetSandbox calls sandbox.v1.SandboxService.GetSandbox.
+func (c *sandboxServiceClient) GetSandbox(ctx context.Context, req *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error) {
+	response, err := c.getSandbox.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -220,15 +222,17 @@ func (c *sandboxServiceClient) ListOpenPort(ctx context.Context, req *v1.ListOpe
 
 // SandboxServiceHandler is an implementation of the sandbox.v1.SandboxService service.
 type SandboxServiceHandler interface {
+	// At starting we create all the resources when the standbox is starting
+	// ie pod, service and  HTTP Route with zero port open
 	StartSandbox(context.Context, *v1.StartSandboxRequest) (*v1.StartSandboxResponse, error)
-	GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error)
+	// Done save as above but in reverse order
 	StopSandbox(context.Context, *v1.StopSandboxRequest) (*v1.StopSandboxResponse, error)
-	// Aditional APIs
+	GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error)
 	ListSandbox(context.Context, *v1.ListSandboxRequest) (*v1.ListSandboxResponse, error)
 	SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error)
+	// And when open or close port: get the resource, reconsile it and update on server
 	OpenPort(context.Context, *v1.OpenPortRequest) (*v1.OpenPortResponse, error)
 	ClosePort(context.Context, *v1.ClosePortRequest) (*v1.ClosePortResponse, error)
-	// Aditional APIs
 	ListOpenPort(context.Context, *v1.ListOpenPortRequest) (*v1.ListOpenPortResponse, error)
 }
 
@@ -245,16 +249,16 @@ func NewSandboxServiceHandler(svc SandboxServiceHandler, opts ...connect.Handler
 		connect.WithSchema(sandboxServiceMethods.ByName("StartSandbox")),
 		connect.WithHandlerOptions(opts...),
 	)
-	sandboxServiceGetSandboxHandler := connect.NewUnaryHandlerSimple(
-		SandboxServiceGetSandboxProcedure,
-		svc.GetSandbox,
-		connect.WithSchema(sandboxServiceMethods.ByName("GetSandbox")),
-		connect.WithHandlerOptions(opts...),
-	)
 	sandboxServiceStopSandboxHandler := connect.NewUnaryHandlerSimple(
 		SandboxServiceStopSandboxProcedure,
 		svc.StopSandbox,
 		connect.WithSchema(sandboxServiceMethods.ByName("StopSandbox")),
+		connect.WithHandlerOptions(opts...),
+	)
+	sandboxServiceGetSandboxHandler := connect.NewUnaryHandlerSimple(
+		SandboxServiceGetSandboxProcedure,
+		svc.GetSandbox,
+		connect.WithSchema(sandboxServiceMethods.ByName("GetSandbox")),
 		connect.WithHandlerOptions(opts...),
 	)
 	sandboxServiceListSandboxHandler := connect.NewUnaryHandlerSimple(
@@ -291,10 +295,10 @@ func NewSandboxServiceHandler(svc SandboxServiceHandler, opts ...connect.Handler
 		switch r.URL.Path {
 		case SandboxServiceStartSandboxProcedure:
 			sandboxServiceStartSandboxHandler.ServeHTTP(w, r)
-		case SandboxServiceGetSandboxProcedure:
-			sandboxServiceGetSandboxHandler.ServeHTTP(w, r)
 		case SandboxServiceStopSandboxProcedure:
 			sandboxServiceStopSandboxHandler.ServeHTTP(w, r)
+		case SandboxServiceGetSandboxProcedure:
+			sandboxServiceGetSandboxHandler.ServeHTTP(w, r)
 		case SandboxServiceListSandboxProcedure:
 			sandboxServiceListSandboxHandler.ServeHTTP(w, r)
 		case SandboxServiceSendCommandProcedure:
@@ -318,12 +322,12 @@ func (UnimplementedSandboxServiceHandler) StartSandbox(context.Context, *v1.Star
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.StartSandbox is not implemented"))
 }
 
-func (UnimplementedSandboxServiceHandler) GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.GetSandbox is not implemented"))
-}
-
 func (UnimplementedSandboxServiceHandler) StopSandbox(context.Context, *v1.StopSandboxRequest) (*v1.StopSandboxResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.StopSandbox is not implemented"))
+}
+
+func (UnimplementedSandboxServiceHandler) GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.GetSandbox is not implemented"))
 }
 
 func (UnimplementedSandboxServiceHandler) ListSandbox(context.Context, *v1.ListSandboxRequest) (*v1.ListSandboxResponse, error) {

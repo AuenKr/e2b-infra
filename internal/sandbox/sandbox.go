@@ -12,6 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	gatewayapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
 // StartSandbox implements [sandboxv1connect.SandboxServiceHandler].
@@ -19,6 +20,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	// Start the pod with given image
 	k8core := s.K8sClient.CoreV1()
 
+	// Create Pod
 	cpuLimit, memoryLimit := config.CPU_MAX_DEFAULT, config.MEMORY_MAX_DEFAULT
 
 	if req.Requirement != nil {
@@ -39,24 +41,12 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	cmds := strings.Fields(req.GetCmd())
 	args := strings.Fields(req.GetArgs())
 
-	// TODO: For future, removal depend on Requirement
-	// This fills like unnecessary, as we do not need this for now
-	// Service linking is not depended on this
-	ports := make([]corev1.ContainerPort, len(req.GetPorts()))
-	for _, port := range req.GetPorts() {
-		ports[0] = corev1.ContainerPort{
-			Name:          GetPortName(port),
-			Protocol:      K8sProtocolAdapter(port.Protocol),
-			ContainerPort: int32(port.PortNumber),
-		}
-	}
-
 	envs := make([]corev1.EnvVar, len(req.GetEnv()))
 	for name, value := range req.GetEnv() {
-		envs[0] = corev1.EnvVar{
+		envs = append(envs, corev1.EnvVar{
 			Name:  name,
 			Value: value,
-		}
+		})
 	}
 
 	container := corev1.Container{
@@ -64,7 +54,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 		Image:     req.Image,
 		Command:   cmds,
 		Args:      args,
-		Ports:     ports,
+		Ports:     []corev1.ContainerPort{},
 		Env:       envs,
 		Resources: resources,
 		// LivenessProbe:   &corev1.Probe{},
@@ -81,17 +71,11 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 			Labels: map[string]string{
 				"id": req.GetId(),
 			},
-			Annotations: map[string]string{},
 		},
 		Spec: corev1.PodSpec{
-			Volumes:             []corev1.Volume{},
-			InitContainers:      []corev1.Container{},
-			Containers:          []corev1.Container{container},
-			EphemeralContainers: []corev1.EphemeralContainer{},
-			SecurityContext:     &corev1.PodSecurityContext{},
-			Hostname:            req.GetId(),
-			Affinity:            &corev1.Affinity{},
-			Tolerations:         []corev1.Toleration{},
+			Containers:      []corev1.Container{container},
+			SecurityContext: &corev1.PodSecurityContext{},
+			Hostname:        req.GetId(),
 		},
 	}
 
@@ -100,19 +84,9 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 		return nil, err
 	}
 
-	// Service creation
-	servicePorts := make([]corev1.ServicePort, len(req.Ports))
-	for i, port := range req.Ports {
-		servicePorts[i] = corev1.ServicePort{
-			Name:     GetPortName(port),
-			Protocol: K8sProtocolAdapter(port.Protocol),
-			Port:     int32(port.PortNumber),
-		}
-	}
-
-	_, err = k8core.Services(s.Config.K8sNamespace).Create(ctx, &corev1.Service{
+	// Create service
+	serviceSpec := corev1.Service{
 		Spec: corev1.ServiceSpec{
-			Ports: servicePorts,
 			Selector: map[string]string{
 				"id": req.Id,
 			},
@@ -120,7 +94,27 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 		ObjectMeta: metav1.ObjectMeta{
 			Name: req.Id,
 		},
-	}, metav1.CreateOptions{})
+	}
+	_, err = k8core.Services(s.Config.K8sNamespace).Create(ctx, &serviceSpec, metav1.CreateOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	// Create HTTP Route
+	gatewayNamespace := gatewayapiv1.Namespace(s.Config.K8sGatewayNamespace)
+	httpSpec := gatewayapiv1.HTTPRoute{
+		Spec: gatewayapiv1.HTTPRouteSpec{
+			CommonRouteSpec: gatewayapiv1.CommonRouteSpec{
+				ParentRefs: []gatewayapiv1.ParentReference{
+					{
+						Namespace: &gatewayNamespace,
+						Name:      gatewayapiv1.ObjectName(s.Config.K8sGateway),
+					},
+				},
+			},
+		},
+	}
+	_, err = s.GatewayClient.GatewayV1().HTTPRoutes(s.Config.K8sNamespace).Create(ctx, &httpSpec, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -129,27 +123,30 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 		Sandbox: &sandboxv1.SandboxInfo{
 			Id:     podInfo.Name,
 			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
-			Url:    podInfo.Status.PodIP,
 		},
 	}, nil
 }
 
 // StopSandbox implements [sandboxv1connect.SandboxServiceHandler].
 func (s *SandboxServer) StopSandbox(ctx context.Context, req *sandboxv1.StopSandboxRequest) (*sandboxv1.StopSandboxResponse, error) {
-	// Stop the pod
 	k8core := s.K8sClient.CoreV1()
 
+	// Delete pod
 	if err := k8core.Pods(s.Config.K8sNamespace).Delete(ctx, req.GetId(), metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
+	// Delete service
 	if err := k8core.Services(s.Config.K8sNamespace).Delete(ctx, req.GetId(), metav1.DeleteOptions{}); err != nil {
+		return nil, err
+	}
+	// Delete HTTP Route
+	if err := s.GatewayClient.GatewayV1().HTTPRoutes(s.Config.K8sNamespace).Delete(ctx, req.GetId(), metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
 	return &sandboxv1.StopSandboxResponse{
 		Sandbox: &sandboxv1.SandboxInfo{
 			Id:     req.Id,
 			Status: sandboxv1.SandboxStatus_SANDBOX_STATUS_STOPPED,
-			Url:    "",
 		},
 	}, nil
 }
@@ -166,7 +163,7 @@ func (s *SandboxServer) GetSandbox(ctx context.Context, req *sandboxv1.GetSandbo
 	var cpuMilli, memoryBytes int64
 
 	// If it fails, metric will be nil. But our api will return the pod info.
-	podMetrics, err := s.Metrics.MetricsV1beta1().PodMetricses(s.Config.K8sNamespace).Get(ctx, req.GetId(), metav1.GetOptions{})
+	podMetrics, err := s.MetricsClient.MetricsV1beta1().PodMetricses(s.Config.K8sNamespace).Get(ctx, req.GetId(), metav1.GetOptions{})
 	if err != nil {
 		s.Logger.Error("failed to get metrics", zap.Error(err))
 	} else {
@@ -176,11 +173,12 @@ func (s *SandboxServer) GetSandbox(ctx context.Context, req *sandboxv1.GetSandbo
 		}
 	}
 
+	//
+
 	return &sandboxv1.GetSandboxResponse{
 		Sandbox: &sandboxv1.SandboxInfo{
 			Id:     podInfo.Name,
 			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
-			Url:    podInfo.Status.PodIP,
 		},
 		Resource: &sandboxv1.Specification{
 			Cpu:    uint32(cpuMilli),
@@ -203,7 +201,6 @@ func (s *SandboxServer) ListSandbox(ctx context.Context, req *sandboxv1.ListSand
 		sandboxs[i] = &sandboxv1.SandboxInfo{
 			Id:     podInfo.Name,
 			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
-			Url:    podInfo.Status.PodIP,
 		}
 	}
 

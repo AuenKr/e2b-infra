@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: sandbox-a
+spec:
+  parentRefs:
+    - name: sandbox-gateway
+      namespace: sandbox
+  hostnames:
+    - "sandbox-a-3000.auenkr.com"
+    - "sandbox-a-4000.auenkr.com"
+  rules:
+    - matches:
+        - headers:
+            - name: Host
+              value: sandbox-a-3000.auenkr.com
+      backendRefs:
+        - name: sandbox-a
+          port: 3000
+    - matches:
+        - headers:
+            - name: Host
+              value: sandbox-a-4000.auenkr.com
+      backendRefs:
+        - name: sandbox-a
+          port: 4000
