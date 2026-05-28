@@ -44,18 +44,18 @@ func (s *SandboxServer) OpenPort(ctx context.Context, req *sandboxv1.OpenPortReq
 		return nil, err
 	}
 
-	route := GetHTTPRoute(req.Id, req.Port.PortNumber, s.Config.Domain)
+	portHostname := GetHTTPRoute(req.Port, s.Config.Domain)
 	// hostname
 	for _, hostname := range httpRoutes.Spec.Hostnames {
-		if string(hostname) == route {
+		if string(hostname) == portHostname {
 			return nil, errors.New("already registered http route")
 		}
 	}
-	httpRoutes.Spec.Hostnames = append(httpRoutes.Spec.Hostnames, gatewayapiv1.Hostname(route))
+	httpRoutes.Spec.Hostnames = append(httpRoutes.Spec.Hostnames, gatewayapiv1.Hostname(portHostname))
 
 	ruleName := gatewayapiv1.SectionName(GetPortName(req.Port))
 	for _, rule := range httpRoutes.Spec.Rules {
-		if *rule.Name == ruleName {
+		if rule.Name != nil && *rule.Name == ruleName {
 			return nil, errors.New("already defined http route rule")
 		}
 	}
@@ -68,7 +68,7 @@ func (s *SandboxServer) OpenPort(ctx context.Context, req *sandboxv1.OpenPortReq
 				Headers: []gatewayapiv1.HTTPHeaderMatch{
 					{
 						Name:  "Host",
-						Value: route,
+						Value: portHostname,
 					},
 				},
 			},
@@ -96,7 +96,7 @@ func (s *SandboxServer) OpenPort(ctx context.Context, req *sandboxv1.OpenPortReq
 		Port: &sandboxv1.PortInfo{
 			PortNumber: req.Port.PortNumber,
 			Protocol:   req.Port.Protocol,
-			Hostname:   GetHTTPRoute(service.Name, uint32(req.Port.PortNumber), s.Config.Domain),
+			Hostname:   GetHTTPRoute(req.Port, s.Config.Domain),
 		},
 	}, nil
 }
@@ -135,7 +135,7 @@ func (s *SandboxServer) ClosePort(ctx context.Context, req *sandboxv1.ClosePortR
 	}
 
 	hostnames := make([]gatewayapiv1.Hostname, 0, len(httpRoutes.Spec.Hostnames))
-	route := GetHTTPRoute(req.Id, req.Port.PortNumber, s.Config.Domain)
+	route := GetHTTPRoute(req.Port, s.Config.Domain)
 	for _, host := range httpRoutes.Spec.Hostnames {
 		if string(host) == route {
 			continue
@@ -149,7 +149,7 @@ func (s *SandboxServer) ClosePort(ctx context.Context, req *sandboxv1.ClosePortR
 	rules := make([]gatewayapiv1.HTTPRouteRule, 0, len(httpRoutes.Spec.Rules))
 	ruleName := gatewayapiv1.SectionName(GetPortName(req.Port))
 	for _, rule := range httpRoutes.Spec.Rules {
-		if rule.Name == &ruleName {
+		if rule.Name != nil && *rule.Name == ruleName {
 			continue
 		}
 		rules = append(rules, rule)
@@ -170,7 +170,7 @@ func (s *SandboxServer) ClosePort(ctx context.Context, req *sandboxv1.ClosePortR
 		Port: &sandboxv1.PortInfo{
 			PortNumber: req.Port.PortNumber,
 			Protocol:   req.Port.Protocol,
-			Hostname:   GetHTTPRoute(service.Name, uint32(req.Port.PortNumber), s.Config.Domain),
+			Hostname:   GetHTTPRoute(req.Port, s.Config.Domain),
 		},
 	}, nil
 }
@@ -187,11 +187,13 @@ func (s *SandboxServer) ListOpenPort(ctx context.Context, req *sandboxv1.ListOpe
 
 	ports := make([]*sandboxv1.PortInfo, len(k8sPod.Spec.Ports))
 	for i, port := range k8sPod.Spec.Ports {
-		ports[i] = &sandboxv1.PortInfo{
+		port := sandboxv1.PortInfo{
 			PortNumber: uint32(port.Port),
 			Protocol:   SandboxProtocolAdapter(port.Protocol),
-			Hostname:   GetHTTPRoute(port.Name, uint32(port.Port), s.Config.Domain),
 		}
+		hostname := GetHTTPRoute(&port, s.Config.Domain)
+		port.Hostname = hostname
+		ports[i] = &port
 	}
 	return &sandboxv1.ListOpenPortResponse{
 		Ports: ports,

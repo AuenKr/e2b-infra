@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 
+	sandboxv1 "e2b/gen/sandbox/v1"
+
 	"github.com/joho/godotenv"
 )
 
@@ -25,6 +27,12 @@ const (
 	CPU_MAX_DEFAULT    = "4000m"
 	MEMORY_MIN_DEFAULT = "1Mi"
 	MEMORY_MAX_DEFAULT = "8Gi"
+)
+
+const (
+	INITIAL_PORT          = 69
+	INITIAL_PORT_NAME     = "intial-port"
+	INITIAL_PORT_PROTOCOL = sandboxv1.Protocol_PROTOCOL_TCP
 )
 
 func NewConfig() Config {

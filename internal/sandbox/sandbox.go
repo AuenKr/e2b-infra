@@ -41,7 +41,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	cmds := strings.Fields(req.GetCmd())
 	args := strings.Fields(req.GetArgs())
 
-	envs := make([]corev1.EnvVar, len(req.GetEnv()))
+	envs := make([]corev1.EnvVar, 0, len(req.GetEnv()))
 	for name, value := range req.GetEnv() {
 		envs = append(envs, corev1.EnvVar{
 			Name:  name,
@@ -86,13 +86,20 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 
 	// Create service
 	serviceSpec := corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: req.Id,
+		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
 				"id": req.Id,
 			},
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: req.Id,
+			Ports: []corev1.ServicePort{
+				{
+					Name:     config.INITIAL_PORT_NAME,
+					Protocol: K8sProtocolAdapter(config.INITIAL_PORT_PROTOCOL),
+					Port:     config.INITIAL_PORT,
+				},
+			},
 		},
 	}
 	_, err = k8core.Services(s.Config.K8sNamespace).Create(ctx, &serviceSpec, metav1.CreateOptions{})
@@ -103,6 +110,9 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	// Create HTTP Route
 	gatewayNamespace := gatewayapiv1.Namespace(s.Config.K8sGatewayNamespace)
 	httpSpec := gatewayapiv1.HTTPRoute{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: req.Id,
+		},
 		Spec: gatewayapiv1.HTTPRouteSpec{
 			CommonRouteSpec: gatewayapiv1.CommonRouteSpec{
 				ParentRefs: []gatewayapiv1.ParentReference{

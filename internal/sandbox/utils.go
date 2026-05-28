@@ -57,6 +57,6 @@ func GetPortName(port *sandboxv1.PortInfo) string {
 	return strings.ToLower(fmt.Sprintf("%s-%d", formattedName, port.PortNumber))
 }
 
-func GetHTTPRoute(id string, port uint32, domain string) string {
-	return fmt.Sprintf("%s.%d.%s", id, port, domain)
+func GetHTTPRoute(port *sandboxv1.PortInfo, domain string) string {
+	return fmt.Sprintf("%s.%s", GetPortName(port), domain)
 }
