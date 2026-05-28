@@ -5,15 +5,12 @@ import (
 	"fmt"
 
 	sandboxv1 "e2b/gen/sandbox/v1"
+	"e2b/pkg/config"
 
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	CPU_MIN_DEFAULT    = "50m"
-	MEMORY_MIN_DEFAULT = "10Mi"
 )
 
 // StartSandbox implements [sandboxv1connect.SandboxServiceHandler].
@@ -21,7 +18,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	// Start the pod with given image
 	k8core := s.K8sClient.CoreV1()
 
-	cpuLimit, memoryLimit := CPU_MIN_DEFAULT, MEMORY_MIN_DEFAULT
+	cpuLimit, memoryLimit := config.CPU_MAX_DEFAULT, config.MEMORY_MAX_DEFAULT
 
 	if req.Requirement != nil {
 		cpuLimit = fmt.Sprintf("%vm", req.Requirement.Cpu)
@@ -33,8 +30,8 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 			corev1.ResourceMemory: resource.MustParse(memoryLimit),
 		},
 		Requests: corev1.ResourceList{
-			corev1.ResourceCPU:    resource.MustParse(CPU_MIN_DEFAULT),
-			corev1.ResourceMemory: resource.MustParse(MEMORY_MIN_DEFAULT),
+			corev1.ResourceCPU:    resource.MustParse(config.CPU_MIN_DEFAULT),
+			corev1.ResourceMemory: resource.MustParse(config.MEMORY_MIN_DEFAULT),
 		},
 	}
 	container := corev1.Container{
@@ -111,9 +108,22 @@ func (s *SandboxServer) StopSandbox(ctx context.Context, req *sandboxv1.StopSand
 func (s *SandboxServer) GetSandbox(ctx context.Context, req *sandboxv1.GetSandboxRequest) (*sandboxv1.GetSandboxResponse, error) {
 	k8core := s.K8sClient.CoreV1()
 
-	podInfo, err := k8core.Pods(s.Config.K8sNamespace).Get(ctx, req.Id, metav1.GetOptions{})
+	podInfo, err := k8core.Pods(s.Config.K8sNamespace).Get(ctx, req.GetId(), metav1.GetOptions{})
 	if err != nil {
 		return nil, err
+	}
+
+	var cpuMilli, memoryBytes int64
+
+	// If it fails, metric will be nil. But our api will return the pod info.
+	podMetrics, err := s.Metrics.MetricsV1beta1().PodMetricses(s.Config.K8sNamespace).Get(ctx, req.GetId(), metav1.GetOptions{})
+	if err != nil {
+		s.Logger.Error("failed to get metrics", zap.Error(err))
+	} else {
+		for _, container := range podMetrics.Containers {
+			cpuMilli += container.Usage.Cpu().MilliValue()
+			memoryBytes += container.Usage.Memory().Value()
+		}
 	}
 
 	return &sandboxv1.GetSandboxResponse{
@@ -123,9 +133,8 @@ func (s *SandboxServer) GetSandbox(ctx context.Context, req *sandboxv1.GetSandbo
 			Url:    podInfo.Status.PodIP,
 		},
 		Resource: &sandboxv1.Specification{
-			Cpu:    uint32(podInfo.Spec.Overhead.Cpu().AsApproximateFloat64()),
-			Memory: uint32(podInfo.Spec.Overhead.Memory().AsApproximateFloat64()),
-			// Storage: podInfo.Sp,
+			Cpu:    uint32(cpuMilli),
+			Memory: uint32(memoryBytes / (1024 * 1024)), // In MB
 		},
 	}, nil
 }

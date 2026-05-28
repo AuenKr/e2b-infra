@@ -15,6 +15,13 @@ type Config struct {
 	K8sNamespace  string
 }
 
+const (
+	CPU_MIN_DEFAULT    = "50m"
+	CPU_MAX_DEFAULT    = "4000m"
+	MEMORY_MIN_DEFAULT = "1Mi"
+	MEMORY_MAX_DEFAULT = "8Gi"
+)
+
 func NewConfig() Config {
 	_ = godotenv.Load()
 	portStr := getEnv("PORT", "8080")

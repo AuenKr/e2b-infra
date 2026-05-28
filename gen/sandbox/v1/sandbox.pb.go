@@ -551,8 +551,11 @@ func (x *SendCommandRequest) GetCommand() string {
 }
 
 type SendCommandResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Result        string                 `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Cmd runs successfully
+	Stdout string `protobuf:"bytes,1,opt,name=stdout,proto3" json:"stdout,omitempty"`
+	// Cmd throws an error
+	Stderr        string `protobuf:"bytes,2,opt,name=stderr,proto3" json:"stderr,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -587,9 +590,16 @@ func (*SendCommandResponse) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *SendCommandResponse) GetResult() string {
+func (x *SendCommandResponse) GetStdout() string {
 	if x != nil {
-		return x.Result
+		return x.Stdout
+	}
+	return ""
+}
+
+func (x *SendCommandResponse) GetStderr() string {
+	if x != nil {
+		return x.Stderr
 	}
 	return ""
 }
@@ -995,6 +1005,7 @@ func (x *SandboxInfo) GetUrl() string {
 	return ""
 }
 
+// Make sure to update the default limit Min and Max limit of CPU and Memory in config
 type Specification struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// In millicore
@@ -1084,9 +1095,10 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\bsandboxs\x18\x01 \x03(\v2\x17.sandbox.v1.SandboxInfoR\bsandboxs\"N\n" +
 	"\x12SendCommandRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12 \n" +
-	"\acommand\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\acommand\"-\n" +
+	"\acommand\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\acommand\"E\n" +
 	"\x13SendCommandResponse\x12\x16\n" +
-	"\x06result\x18\x01 \x01(\tR\x06result\"M\n" +
+	"\x06stdout\x18\x01 \x01(\tR\x06stdout\x12\x16\n" +
+	"\x06stderr\x18\x02 \x01(\tR\x06stderr\"M\n" +
 	"\x0fOpenPortRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\"\n" +
 	"\x04port\x18\x02 \x01(\rB\x0e\xbaH\v\xc8\x01\x01*\x06\x18\xff\xff\x03 \x00R\x04port\"<\n" +

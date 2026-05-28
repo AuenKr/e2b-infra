@@ -13,12 +13,16 @@ import (
 	"go.uber.org/zap"
 
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	metricsclientset "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 type SandboxServerParams struct {
 	fx.In
 	Config    config.Config
 	K8sClient *kubernetes.Clientset
+	K8sConfig *rest.Config
+	Metrics   *metricsclientset.Clientset
 	Logger    *zap.Logger
 }
 
@@ -26,6 +30,8 @@ func NewSandboxServer(in SandboxServerParams) *SandboxServer {
 	return &SandboxServer{
 		Config:    in.Config,
 		K8sClient: in.K8sClient,
+		K8sConfig: in.K8sConfig,
+		Metrics:   in.Metrics,
 		Logger:    in.Logger,
 	}
 }
@@ -53,5 +59,7 @@ var _ sandboxv1connect.SandboxServiceHandler = (*SandboxServer)(nil)
 type SandboxServer struct {
 	Config    config.Config
 	K8sClient *kubernetes.Clientset
+	K8sConfig *rest.Config
+	Metrics   *metricsclientset.Clientset
 	Logger    *zap.Logger
 }

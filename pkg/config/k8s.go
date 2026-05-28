@@ -1,14 +1,11 @@
 package config
 
 import (
-	"os"
-	"path/filepath"
-
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+	metricsclientset "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 type K8sClientParams struct {
@@ -17,31 +14,14 @@ type K8sClientParams struct {
 	Logger *zap.Logger
 }
 
-func NewK8sClusterClient(in K8sClientParams) (*kubernetes.Clientset, error) {
-	var k8sConfig *rest.Config
-	if in.Config.Mode == "dev" {
-		// Location path for kubeconfig
-		// The default location for the kubeconfig file is in the user's home directory.
-		var kubeconfig string
-		if home := os.Getenv("HOME"); home != "" {
-			kubeconfig = filepath.Join(home, ".kube", "config")
-		}
-		if in.Config.K8sConfigPath != "" {
-			kubeconfig = in.Config.K8sConfigPath
-		}
+func NewK8sRESTConfig(in K8sClientParams) (*rest.Config, error) {
+	return newK8sConfig(in)
+}
 
-		cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-		if err != nil {
-			return nil, err
-		}
-		k8sConfig = cfg
-	} else {
-		// Get from serice account present inside the cluster
-		cfg, err := rest.InClusterConfig()
-		if err != nil {
-			return nil, err
-		}
-		k8sConfig = cfg
+func NewK8sClusterClient(in K8sClientParams) (*kubernetes.Clientset, error) {
+	k8sConfig, err := newK8sConfig(in)
+	if err != nil {
+		return nil, err
 	}
 
 	client, err := kubernetes.NewForConfig(k8sConfig)
@@ -49,5 +29,19 @@ func NewK8sClusterClient(in K8sClientParams) (*kubernetes.Clientset, error) {
 		return nil, err
 	}
 	in.Logger.Info("Successfully connected to the cluster")
+	return client, nil
+}
+
+func NewK8sMetricClient(in K8sClientParams) (*metricsclientset.Clientset, error) {
+	k8sConfig, err := newK8sConfig(in)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := metricsclientset.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+	in.Logger.Info("Successfully connected to the cluster metrics API")
 	return client, nil
 }

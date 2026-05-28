@@ -11,5 +11,7 @@ var Module = fx.Module(
 	"package",
 	fx.Provide(config.NewConfig),
 	fx.Provide(config.NewLogger),
+	fx.Provide(config.NewK8sRESTConfig),
 	fx.Provide(config.NewK8sClusterClient),
+	fx.Provide(config.NewK8sMetricClient),
 )

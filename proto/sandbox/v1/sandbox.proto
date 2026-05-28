@@ -60,7 +60,10 @@ message SendCommandRequest {
 }
 
 message SendCommandResponse {
-  string result = 1;
+  // Cmd runs successfully
+  string stdout = 1;
+  // Cmd throws an error
+  string stderr = 2;
 }
 
 message OpenPortRequest {
@@ -126,6 +129,7 @@ enum PortStatus {
   PORT_STATUS_CLOSED = 2;
 }
 
+// Make sure to update the default limit Min and Max limit of CPU and Memory in config
 message Specification {
   // In millicore
   uint32 cpu = 1 [
