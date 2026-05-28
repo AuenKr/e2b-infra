@@ -21,7 +21,9 @@ service SandboxService {
 
 message StartSandboxRequest {
   string image = 1 [(buf.validate.field).required = true];
-  Specification requirement = 2 [(buf.validate.field).required = true];
+  Specification requirement = 2 [(buf.validate.field).required = false];
+  // name of pod
+  string id = 3 [(buf.validate.field).required = true];
 }
 
 message StartSandboxResponse {
@@ -34,6 +36,7 @@ message GetSandboxRequest {
 
 message GetSandboxResponse {
   SandboxInfo sandbox = 1;
+  Specification resource = 2;
 }
 
 message StopSandboxRequest {
@@ -52,6 +55,7 @@ message ListSandboxResponse {
 
 message SendCommandRequest {
   string id = 1 [(buf.validate.field).required = true];
+  string command = 2 [(buf.validate.field).required = true];
   // bool streaming = 2;
 }
 
@@ -101,6 +105,7 @@ message PortInfo {
 }
 
 message SandboxInfo {
+  // Name will be unique in each namespace, it will act as id
   string id = 1;
   SandboxStatus status = 2;
   string url = 3;

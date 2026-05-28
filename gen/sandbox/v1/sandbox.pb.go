@@ -130,9 +130,11 @@ func (PortStatus) EnumDescriptor() ([]byte, []int) {
 }
 
 type StartSandboxRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Image         string                 `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
-	Requirement   *Specification         `protobuf:"bytes,2,opt,name=requirement,proto3" json:"requirement,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Image       string                 `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
+	Requirement *Specification         `protobuf:"bytes,2,opt,name=requirement,proto3" json:"requirement,omitempty"`
+	// name of pod
+	Id            string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -179,6 +181,13 @@ func (x *StartSandboxRequest) GetRequirement() *Specification {
 		return x.Requirement
 	}
 	return nil
+}
+
+func (x *StartSandboxRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
 }
 
 type StartSandboxResponse struct {
@@ -272,6 +281,7 @@ func (x *GetSandboxRequest) GetId() string {
 type GetSandboxResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Sandbox       *SandboxInfo           `protobuf:"bytes,1,opt,name=sandbox,proto3" json:"sandbox,omitempty"`
+	Resource      *Specification         `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -309,6 +319,13 @@ func (*GetSandboxResponse) Descriptor() ([]byte, []int) {
 func (x *GetSandboxResponse) GetSandbox() *SandboxInfo {
 	if x != nil {
 		return x.Sandbox
+	}
+	return nil
+}
+
+func (x *GetSandboxResponse) GetResource() *Specification {
+	if x != nil {
+		return x.Resource
 	}
 	return nil
 }
@@ -483,7 +500,8 @@ func (x *ListSandboxResponse) GetSandboxs() []*SandboxInfo {
 
 type SendCommandRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // bool streaming = 2;
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Command       string                 `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"` // bool streaming = 2;
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -521,6 +539,13 @@ func (*SendCommandRequest) Descriptor() ([]byte, []int) {
 func (x *SendCommandRequest) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *SendCommandRequest) GetCommand() string {
+	if x != nil {
+		return x.Command
 	}
 	return ""
 }
@@ -910,10 +935,11 @@ func (x *PortInfo) GetStatus() PortStatus {
 }
 
 type SandboxInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        SandboxStatus          `protobuf:"varint,2,opt,name=status,proto3,enum=sandbox.v1.SandboxStatus" json:"status,omitempty"`
-	Url           string                 `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name will be unique in each namespace, it will act as id
+	Id            string        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status        SandboxStatus `protobuf:"varint,2,opt,name=status,proto3,enum=sandbox.v1.SandboxStatus" json:"status,omitempty"`
+	Url           string        `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1037,25 +1063,28 @@ var File_sandbox_v1_sandbox_proto protoreflect.FileDescriptor
 const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\n" +
 	"\x18sandbox/v1/sandbox.proto\x12\n" +
-	"sandbox.v1\x1a\x1bbuf/validate/validate.proto\"x\n" +
+	"sandbox.v1\x1a\x1bbuf/validate/validate.proto\"\x90\x01\n" +
 	"\x13StartSandboxRequest\x12\x1c\n" +
 	"\x05image\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05image\x12C\n" +
-	"\vrequirement\x18\x02 \x01(\v2\x19.sandbox.v1.SpecificationB\x06\xbaH\x03\xc8\x01\x01R\vrequirement\"I\n" +
+	"\vrequirement\x18\x02 \x01(\v2\x19.sandbox.v1.SpecificationB\x06\xbaH\x03\xc8\x01\x00R\vrequirement\x12\x16\n" +
+	"\x02id\x18\x03 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"I\n" +
 	"\x14StartSandboxResponse\x121\n" +
 	"\asandbox\x18\x01 \x01(\v2\x17.sandbox.v1.SandboxInfoR\asandbox\"+\n" +
 	"\x11GetSandboxRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"G\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"~\n" +
 	"\x12GetSandboxResponse\x121\n" +
-	"\asandbox\x18\x01 \x01(\v2\x17.sandbox.v1.SandboxInfoR\asandbox\",\n" +
+	"\asandbox\x18\x01 \x01(\v2\x17.sandbox.v1.SandboxInfoR\asandbox\x125\n" +
+	"\bresource\x18\x02 \x01(\v2\x19.sandbox.v1.SpecificationR\bresource\",\n" +
 	"\x12StopSandboxRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"H\n" +
 	"\x13StopSandboxResponse\x121\n" +
 	"\asandbox\x18\x01 \x01(\v2\x17.sandbox.v1.SandboxInfoR\asandbox\"\x14\n" +
 	"\x12ListSandboxRequest\"J\n" +
 	"\x13ListSandboxResponse\x123\n" +
-	"\bsandboxs\x18\x01 \x03(\v2\x17.sandbox.v1.SandboxInfoR\bsandboxs\",\n" +
+	"\bsandboxs\x18\x01 \x03(\v2\x17.sandbox.v1.SandboxInfoR\bsandboxs\"N\n" +
 	"\x12SendCommandRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"-\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12 \n" +
+	"\acommand\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\acommand\"-\n" +
 	"\x13SendCommandResponse\x12\x16\n" +
 	"\x06result\x18\x01 \x01(\tR\x06result\"M\n" +
 	"\x0fOpenPortRequest\x12\x16\n" +
@@ -1153,34 +1182,35 @@ var file_sandbox_v1_sandbox_proto_depIdxs = []int32{
 	20, // 0: sandbox.v1.StartSandboxRequest.requirement:type_name -> sandbox.v1.Specification
 	19, // 1: sandbox.v1.StartSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
 	19, // 2: sandbox.v1.GetSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
-	19, // 3: sandbox.v1.StopSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
-	19, // 4: sandbox.v1.ListSandboxResponse.sandboxs:type_name -> sandbox.v1.SandboxInfo
-	18, // 5: sandbox.v1.OpenPortResponse.port:type_name -> sandbox.v1.PortInfo
-	18, // 6: sandbox.v1.ClosePortResponse.port:type_name -> sandbox.v1.PortInfo
-	18, // 7: sandbox.v1.ListOpenPortResponse.ports:type_name -> sandbox.v1.PortInfo
-	1,  // 8: sandbox.v1.PortInfo.status:type_name -> sandbox.v1.PortStatus
-	0,  // 9: sandbox.v1.SandboxInfo.status:type_name -> sandbox.v1.SandboxStatus
-	2,  // 10: sandbox.v1.SandboxService.StartSandbox:input_type -> sandbox.v1.StartSandboxRequest
-	4,  // 11: sandbox.v1.SandboxService.GetSandbox:input_type -> sandbox.v1.GetSandboxRequest
-	6,  // 12: sandbox.v1.SandboxService.StopSandbox:input_type -> sandbox.v1.StopSandboxRequest
-	8,  // 13: sandbox.v1.SandboxService.ListSandbox:input_type -> sandbox.v1.ListSandboxRequest
-	10, // 14: sandbox.v1.SandboxService.SendCommand:input_type -> sandbox.v1.SendCommandRequest
-	12, // 15: sandbox.v1.SandboxService.OpenPort:input_type -> sandbox.v1.OpenPortRequest
-	14, // 16: sandbox.v1.SandboxService.ClosePort:input_type -> sandbox.v1.ClosePortRequest
-	16, // 17: sandbox.v1.SandboxService.ListOpenPort:input_type -> sandbox.v1.ListOpenPortRequest
-	3,  // 18: sandbox.v1.SandboxService.StartSandbox:output_type -> sandbox.v1.StartSandboxResponse
-	5,  // 19: sandbox.v1.SandboxService.GetSandbox:output_type -> sandbox.v1.GetSandboxResponse
-	7,  // 20: sandbox.v1.SandboxService.StopSandbox:output_type -> sandbox.v1.StopSandboxResponse
-	9,  // 21: sandbox.v1.SandboxService.ListSandbox:output_type -> sandbox.v1.ListSandboxResponse
-	11, // 22: sandbox.v1.SandboxService.SendCommand:output_type -> sandbox.v1.SendCommandResponse
-	13, // 23: sandbox.v1.SandboxService.OpenPort:output_type -> sandbox.v1.OpenPortResponse
-	15, // 24: sandbox.v1.SandboxService.ClosePort:output_type -> sandbox.v1.ClosePortResponse
-	17, // 25: sandbox.v1.SandboxService.ListOpenPort:output_type -> sandbox.v1.ListOpenPortResponse
-	18, // [18:26] is the sub-list for method output_type
-	10, // [10:18] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	20, // 3: sandbox.v1.GetSandboxResponse.resource:type_name -> sandbox.v1.Specification
+	19, // 4: sandbox.v1.StopSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
+	19, // 5: sandbox.v1.ListSandboxResponse.sandboxs:type_name -> sandbox.v1.SandboxInfo
+	18, // 6: sandbox.v1.OpenPortResponse.port:type_name -> sandbox.v1.PortInfo
+	18, // 7: sandbox.v1.ClosePortResponse.port:type_name -> sandbox.v1.PortInfo
+	18, // 8: sandbox.v1.ListOpenPortResponse.ports:type_name -> sandbox.v1.PortInfo
+	1,  // 9: sandbox.v1.PortInfo.status:type_name -> sandbox.v1.PortStatus
+	0,  // 10: sandbox.v1.SandboxInfo.status:type_name -> sandbox.v1.SandboxStatus
+	2,  // 11: sandbox.v1.SandboxService.StartSandbox:input_type -> sandbox.v1.StartSandboxRequest
+	4,  // 12: sandbox.v1.SandboxService.GetSandbox:input_type -> sandbox.v1.GetSandboxRequest
+	6,  // 13: sandbox.v1.SandboxService.StopSandbox:input_type -> sandbox.v1.StopSandboxRequest
+	8,  // 14: sandbox.v1.SandboxService.ListSandbox:input_type -> sandbox.v1.ListSandboxRequest
+	10, // 15: sandbox.v1.SandboxService.SendCommand:input_type -> sandbox.v1.SendCommandRequest
+	12, // 16: sandbox.v1.SandboxService.OpenPort:input_type -> sandbox.v1.OpenPortRequest
+	14, // 17: sandbox.v1.SandboxService.ClosePort:input_type -> sandbox.v1.ClosePortRequest
+	16, // 18: sandbox.v1.SandboxService.ListOpenPort:input_type -> sandbox.v1.ListOpenPortRequest
+	3,  // 19: sandbox.v1.SandboxService.StartSandbox:output_type -> sandbox.v1.StartSandboxResponse
+	5,  // 20: sandbox.v1.SandboxService.GetSandbox:output_type -> sandbox.v1.GetSandboxResponse
+	7,  // 21: sandbox.v1.SandboxService.StopSandbox:output_type -> sandbox.v1.StopSandboxResponse
+	9,  // 22: sandbox.v1.SandboxService.ListSandbox:output_type -> sandbox.v1.ListSandboxResponse
+	11, // 23: sandbox.v1.SandboxService.SendCommand:output_type -> sandbox.v1.SendCommandResponse
+	13, // 24: sandbox.v1.SandboxService.OpenPort:output_type -> sandbox.v1.OpenPortResponse
+	15, // 25: sandbox.v1.SandboxService.ClosePort:output_type -> sandbox.v1.ClosePortResponse
+	17, // 26: sandbox.v1.SandboxService.ListOpenPort:output_type -> sandbox.v1.ListOpenPortResponse
+	19, // [19:27] is the sub-list for method output_type
+	11, // [11:19] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_sandbox_v1_sandbox_proto_init() }
