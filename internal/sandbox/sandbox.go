@@ -3,6 +3,7 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	sandboxv1 "e2b/gen/sandbox/v1"
 	"e2b/pkg/config"
@@ -34,13 +35,38 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 			corev1.ResourceMemory: resource.MustParse(config.MEMORY_MIN_DEFAULT),
 		},
 	}
+
+	cmds := strings.Fields(req.GetCmd())
+	args := strings.Fields(req.GetArgs())
+
+	ports := make([]corev1.ContainerPort, len(req.GetPorts()))
+	for _, port := range req.GetPorts() {
+		protocol, err := protocolAdapter(port.Protocol)
+		if err != nil {
+			return nil, err
+		}
+		ports[0] = corev1.ContainerPort{
+			Name:          fmt.Sprintf("%s-%d", req.Id, port.Port),
+			Protocol:      protocol,
+			ContainerPort: int32(port.Port),
+		}
+	}
+
+	envs := make([]corev1.EnvVar, len(req.GetEnv()))
+	for name, value := range req.GetEnv() {
+		envs[0] = corev1.EnvVar{
+			Name:  name,
+			Value: value,
+		}
+	}
+
 	container := corev1.Container{
 		Name:      req.Id,
 		Image:     req.Image,
-		Command:   []string{},
-		Args:      []string{},
-		Ports:     []corev1.ContainerPort{},
-		Env:       []corev1.EnvVar{},
+		Command:   cmds,
+		Args:      args,
+		Ports:     ports,
+		Env:       envs,
 		Resources: resources,
 		// LivenessProbe:   &corev1.Probe{},
 		// ReadinessProbe:  &corev1.Probe{},
@@ -81,7 +107,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	return &sandboxv1.StartSandboxResponse{
 		Sandbox: &sandboxv1.SandboxInfo{
 			Id:     podInfo.Name,
-			Status: convertPodPhaseToSandboxState(podInfo.Status.Phase),
+			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 			Url:    podInfo.Status.PodIP,
 		},
 	}, nil
@@ -129,7 +155,7 @@ func (s *SandboxServer) GetSandbox(ctx context.Context, req *sandboxv1.GetSandbo
 	return &sandboxv1.GetSandboxResponse{
 		Sandbox: &sandboxv1.SandboxInfo{
 			Id:     podInfo.Name,
-			Status: convertPodPhaseToSandboxState(podInfo.Status.Phase),
+			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 			Url:    podInfo.Status.PodIP,
 		},
 		Resource: &sandboxv1.Specification{
@@ -152,7 +178,7 @@ func (s *SandboxServer) ListSandbox(ctx context.Context, req *sandboxv1.ListSand
 	for i, podInfo := range podsInfo.Items {
 		sandboxs[i] = &sandboxv1.SandboxInfo{
 			Id:     podInfo.Name,
-			Status: convertPodPhaseToSandboxState(podInfo.Status.Phase),
+			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 			Url:    podInfo.Status.PodIP,
 		}
 	}

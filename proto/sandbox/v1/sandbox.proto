@@ -20,10 +20,14 @@ service SandboxService {
 }
 
 message StartSandboxRequest {
-  string image = 1 [(buf.validate.field).required = true];
-  Specification requirement = 2 [(buf.validate.field).required = false];
   // name of pod
-  string id = 3 [(buf.validate.field).required = true];
+  string id = 1 [(buf.validate.field).required = true];
+  string image = 2 [(buf.validate.field).required = true];
+  Specification requirement = 3 [(buf.validate.field).required = false];
+  map<string, string> env = 4 [(buf.validate.field).required = false];
+  string cmd = 5 [(buf.validate.field).required = false];
+  string args = 6 [(buf.validate.field).required = false];
+  repeated PortInfo ports = 7 [(buf.validate.field).required = false];
 }
 
 message StartSandboxResponse {
@@ -98,19 +102,32 @@ message ListOpenPortResponse {
   repeated PortInfo ports = 1;
 }
 
+enum Protocol {
+  PROTOCOL_UNSPECIFIED = 0;
+  PROTOCOL_TCP = 1;
+  PROTOCOL_UDP = 2;
+  PROTOCOL_SCTP = 3;
+}
+
 message PortInfo {
-  uint32 port = 1 [(buf.validate.field).uint32 = {
-    gt: 0
-    lte: 65535
-  }];
-  string url = 2 [(buf.validate.field).string.uri = true];
-  PortStatus status = 3;
+  uint32 port = 1 [
+    (buf.validate.field).uint32 = {
+      gt: 0
+      lte: 65535
+    },
+    (buf.validate.field).required = true
+  ];
+  Protocol protocol = 2 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).required = true
+  ];
+  string hostname = 3 [(buf.validate.field).string.hostname = true];
 }
 
 message SandboxInfo {
   // Name will be unique in each namespace, it will act as id
   string id = 1;
-  SandboxStatus status = 2;
+  SandboxStatus status = 2 [(buf.validate.field).enum.defined_only = true];
   string url = 3;
 }
 
@@ -121,12 +138,6 @@ enum SandboxStatus {
   SANDBOX_STATUS_STOPPING = 3;
   SANDBOX_STATUS_STOPPED = 4;
   SANDBOX_STATUS_ERROR = 5;
-}
-
-enum PortStatus {
-  PORT_STATUS_UNSPECIFIED = 0;
-  PORT_STATUS_OPEN = 1;
-  PORT_STATUS_CLOSED = 2;
 }
 
 // Make sure to update the default limit Min and Max limit of CPU and Memory in config
