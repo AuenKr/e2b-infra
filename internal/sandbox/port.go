@@ -59,7 +59,7 @@ func (s *SandboxServer) ClosePort(ctx context.Context, req *sandboxv1.ClosePortR
 		return nil, err
 	}
 
-	newPorts := make([]corev1.ServicePort, len(service.Spec.Ports))
+	newPorts := make([]corev1.ServicePort, 0, len(service.Spec.Ports))
 	for _, port := range service.Spec.Ports {
 		if port.Port == int32(req.Port.PortNumber) && port.Protocol == K8sProtocolAdapter(req.Port.Protocol) {
 			continue
