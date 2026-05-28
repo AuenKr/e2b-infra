@@ -72,13 +72,7 @@ message SendCommandResponse {
 
 message OpenPortRequest {
   string id = 1 [(buf.validate.field).required = true];
-  uint32 port = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).uint32 = {
-      gt: 0
-      lte: 65535
-    }
-  ];
+  PortInfo port = 2 [(buf.validate.field).required = true];
 }
 
 message OpenPortResponse {
@@ -87,7 +81,7 @@ message OpenPortResponse {
 
 message ClosePortRequest {
   string id = 1 [(buf.validate.field).required = true];
-  int32 port = 2 [(buf.validate.field).required = true];
+  PortInfo port = 2 [(buf.validate.field).required = true];
 }
 
 message ClosePortResponse {
@@ -110,7 +104,7 @@ enum Protocol {
 }
 
 message PortInfo {
-  uint32 port = 1 [
+  uint32 port_number = 1 [
     (buf.validate.field).uint32 = {
       gt: 0
       lte: 65535
@@ -121,7 +115,10 @@ message PortInfo {
     (buf.validate.field).enum.defined_only = true,
     (buf.validate.field).required = true
   ];
-  string hostname = 3 [(buf.validate.field).string.hostname = true];
+  string hostname = 3 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).string.hostname = true
+  ];
 }
 
 message SandboxInfo {

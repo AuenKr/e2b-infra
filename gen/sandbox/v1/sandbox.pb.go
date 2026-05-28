@@ -642,7 +642,7 @@ func (x *SendCommandResponse) GetStderr() string {
 type OpenPortRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Port          uint32                 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	Port          *PortInfo              `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -684,11 +684,11 @@ func (x *OpenPortRequest) GetId() string {
 	return ""
 }
 
-func (x *OpenPortRequest) GetPort() uint32 {
+func (x *OpenPortRequest) GetPort() *PortInfo {
 	if x != nil {
 		return x.Port
 	}
-	return 0
+	return nil
 }
 
 type OpenPortResponse struct {
@@ -738,7 +738,7 @@ func (x *OpenPortResponse) GetPort() *PortInfo {
 type ClosePortRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Port          int32                  `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	Port          *PortInfo              `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -780,11 +780,11 @@ func (x *ClosePortRequest) GetId() string {
 	return ""
 }
 
-func (x *ClosePortRequest) GetPort() int32 {
+func (x *ClosePortRequest) GetPort() *PortInfo {
 	if x != nil {
 		return x.Port
 	}
-	return 0
+	return nil
 }
 
 type ClosePortResponse struct {
@@ -921,7 +921,7 @@ func (x *ListOpenPortResponse) GetPorts() []*PortInfo {
 
 type PortInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Port          uint32                 `protobuf:"varint,1,opt,name=port,proto3" json:"port,omitempty"`
+	PortNumber    uint32                 `protobuf:"varint,1,opt,name=port_number,json=portNumber,proto3" json:"port_number,omitempty"`
 	Protocol      Protocol               `protobuf:"varint,2,opt,name=protocol,proto3,enum=sandbox.v1.Protocol" json:"protocol,omitempty"`
 	Hostname      string                 `protobuf:"bytes,3,opt,name=hostname,proto3" json:"hostname,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -958,9 +958,9 @@ func (*PortInfo) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *PortInfo) GetPort() uint32 {
+func (x *PortInfo) GetPortNumber() uint32 {
 	if x != nil {
-		return x.Port
+		return x.PortNumber
 	}
 	return 0
 }
@@ -1140,25 +1140,27 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\acommand\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\acommand\"E\n" +
 	"\x13SendCommandResponse\x12\x16\n" +
 	"\x06stdout\x18\x01 \x01(\tR\x06stdout\x12\x16\n" +
-	"\x06stderr\x18\x02 \x01(\tR\x06stderr\"M\n" +
+	"\x06stderr\x18\x02 \x01(\tR\x06stderr\"[\n" +
 	"\x0fOpenPortRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\"\n" +
-	"\x04port\x18\x02 \x01(\rB\x0e\xbaH\v\xc8\x01\x01*\x06\x18\xff\xff\x03 \x00R\x04port\"<\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x120\n" +
+	"\x04port\x18\x02 \x01(\v2\x14.sandbox.v1.PortInfoB\x06\xbaH\x03\xc8\x01\x01R\x04port\"<\n" +
 	"\x10OpenPortResponse\x12(\n" +
-	"\x04port\x18\x01 \x01(\v2\x14.sandbox.v1.PortInfoR\x04port\"F\n" +
+	"\x04port\x18\x01 \x01(\v2\x14.sandbox.v1.PortInfoR\x04port\"\\\n" +
 	"\x10ClosePortRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\x1a\n" +
-	"\x04port\x18\x02 \x01(\x05B\x06\xbaH\x03\xc8\x01\x01R\x04port\"=\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x120\n" +
+	"\x04port\x18\x02 \x01(\v2\x14.sandbox.v1.PortInfoB\x06\xbaH\x03\xc8\x01\x01R\x04port\"=\n" +
 	"\x11ClosePortResponse\x12(\n" +
 	"\x04port\x18\x01 \x01(\v2\x14.sandbox.v1.PortInfoR\x04port\"-\n" +
 	"\x13ListOpenPortRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"B\n" +
 	"\x14ListOpenPortResponse\x12*\n" +
-	"\x05ports\x18\x01 \x03(\v2\x14.sandbox.v1.PortInfoR\x05ports\"\x92\x01\n" +
-	"\bPortInfo\x12\"\n" +
-	"\x04port\x18\x01 \x01(\rB\x0e\xbaH\v\xc8\x01\x01*\x06\x18\xff\xff\x03 \x00R\x04port\x12=\n" +
-	"\bprotocol\x18\x02 \x01(\x0e2\x14.sandbox.v1.ProtocolB\v\xbaH\b\xc8\x01\x01\x82\x01\x02\x10\x01R\bprotocol\x12#\n" +
-	"\bhostname\x18\x03 \x01(\tB\a\xbaH\x04r\x02h\x01R\bhostname\"l\n" +
+	"\x05ports\x18\x01 \x03(\v2\x14.sandbox.v1.PortInfoR\x05ports\"\xa2\x01\n" +
+	"\bPortInfo\x12/\n" +
+	"\vport_number\x18\x01 \x01(\rB\x0e\xbaH\v\xc8\x01\x01*\x06\x18\xff\xff\x03 \x00R\n" +
+	"portNumber\x12=\n" +
+	"\bprotocol\x18\x02 \x01(\x0e2\x14.sandbox.v1.ProtocolB\v\xbaH\b\xc8\x01\x01\x82\x01\x02\x10\x01R\bprotocol\x12&\n" +
+	"\bhostname\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xd8\x01\x01r\x02h\x01R\bhostname\"l\n" +
 	"\vSandboxInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12;\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x19.sandbox.v1.SandboxStatusB\b\xbaH\x05\x82\x01\x02\x10\x01R\x06status\x12\x10\n" +
@@ -1242,32 +1244,34 @@ var file_sandbox_v1_sandbox_proto_depIdxs = []int32{
 	20, // 5: sandbox.v1.GetSandboxResponse.resource:type_name -> sandbox.v1.Specification
 	19, // 6: sandbox.v1.StopSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
 	19, // 7: sandbox.v1.ListSandboxResponse.sandboxs:type_name -> sandbox.v1.SandboxInfo
-	18, // 8: sandbox.v1.OpenPortResponse.port:type_name -> sandbox.v1.PortInfo
-	18, // 9: sandbox.v1.ClosePortResponse.port:type_name -> sandbox.v1.PortInfo
-	18, // 10: sandbox.v1.ListOpenPortResponse.ports:type_name -> sandbox.v1.PortInfo
-	0,  // 11: sandbox.v1.PortInfo.protocol:type_name -> sandbox.v1.Protocol
-	1,  // 12: sandbox.v1.SandboxInfo.status:type_name -> sandbox.v1.SandboxStatus
-	2,  // 13: sandbox.v1.SandboxService.StartSandbox:input_type -> sandbox.v1.StartSandboxRequest
-	4,  // 14: sandbox.v1.SandboxService.GetSandbox:input_type -> sandbox.v1.GetSandboxRequest
-	6,  // 15: sandbox.v1.SandboxService.StopSandbox:input_type -> sandbox.v1.StopSandboxRequest
-	8,  // 16: sandbox.v1.SandboxService.ListSandbox:input_type -> sandbox.v1.ListSandboxRequest
-	10, // 17: sandbox.v1.SandboxService.SendCommand:input_type -> sandbox.v1.SendCommandRequest
-	12, // 18: sandbox.v1.SandboxService.OpenPort:input_type -> sandbox.v1.OpenPortRequest
-	14, // 19: sandbox.v1.SandboxService.ClosePort:input_type -> sandbox.v1.ClosePortRequest
-	16, // 20: sandbox.v1.SandboxService.ListOpenPort:input_type -> sandbox.v1.ListOpenPortRequest
-	3,  // 21: sandbox.v1.SandboxService.StartSandbox:output_type -> sandbox.v1.StartSandboxResponse
-	5,  // 22: sandbox.v1.SandboxService.GetSandbox:output_type -> sandbox.v1.GetSandboxResponse
-	7,  // 23: sandbox.v1.SandboxService.StopSandbox:output_type -> sandbox.v1.StopSandboxResponse
-	9,  // 24: sandbox.v1.SandboxService.ListSandbox:output_type -> sandbox.v1.ListSandboxResponse
-	11, // 25: sandbox.v1.SandboxService.SendCommand:output_type -> sandbox.v1.SendCommandResponse
-	13, // 26: sandbox.v1.SandboxService.OpenPort:output_type -> sandbox.v1.OpenPortResponse
-	15, // 27: sandbox.v1.SandboxService.ClosePort:output_type -> sandbox.v1.ClosePortResponse
-	17, // 28: sandbox.v1.SandboxService.ListOpenPort:output_type -> sandbox.v1.ListOpenPortResponse
-	21, // [21:29] is the sub-list for method output_type
-	13, // [13:21] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	18, // 8: sandbox.v1.OpenPortRequest.port:type_name -> sandbox.v1.PortInfo
+	18, // 9: sandbox.v1.OpenPortResponse.port:type_name -> sandbox.v1.PortInfo
+	18, // 10: sandbox.v1.ClosePortRequest.port:type_name -> sandbox.v1.PortInfo
+	18, // 11: sandbox.v1.ClosePortResponse.port:type_name -> sandbox.v1.PortInfo
+	18, // 12: sandbox.v1.ListOpenPortResponse.ports:type_name -> sandbox.v1.PortInfo
+	0,  // 13: sandbox.v1.PortInfo.protocol:type_name -> sandbox.v1.Protocol
+	1,  // 14: sandbox.v1.SandboxInfo.status:type_name -> sandbox.v1.SandboxStatus
+	2,  // 15: sandbox.v1.SandboxService.StartSandbox:input_type -> sandbox.v1.StartSandboxRequest
+	4,  // 16: sandbox.v1.SandboxService.GetSandbox:input_type -> sandbox.v1.GetSandboxRequest
+	6,  // 17: sandbox.v1.SandboxService.StopSandbox:input_type -> sandbox.v1.StopSandboxRequest
+	8,  // 18: sandbox.v1.SandboxService.ListSandbox:input_type -> sandbox.v1.ListSandboxRequest
+	10, // 19: sandbox.v1.SandboxService.SendCommand:input_type -> sandbox.v1.SendCommandRequest
+	12, // 20: sandbox.v1.SandboxService.OpenPort:input_type -> sandbox.v1.OpenPortRequest
+	14, // 21: sandbox.v1.SandboxService.ClosePort:input_type -> sandbox.v1.ClosePortRequest
+	16, // 22: sandbox.v1.SandboxService.ListOpenPort:input_type -> sandbox.v1.ListOpenPortRequest
+	3,  // 23: sandbox.v1.SandboxService.StartSandbox:output_type -> sandbox.v1.StartSandboxResponse
+	5,  // 24: sandbox.v1.SandboxService.GetSandbox:output_type -> sandbox.v1.GetSandboxResponse
+	7,  // 25: sandbox.v1.SandboxService.StopSandbox:output_type -> sandbox.v1.StopSandboxResponse
+	9,  // 26: sandbox.v1.SandboxService.ListSandbox:output_type -> sandbox.v1.ListSandboxResponse
+	11, // 27: sandbox.v1.SandboxService.SendCommand:output_type -> sandbox.v1.SendCommandResponse
+	13, // 28: sandbox.v1.SandboxService.OpenPort:output_type -> sandbox.v1.OpenPortResponse
+	15, // 29: sandbox.v1.SandboxService.ClosePort:output_type -> sandbox.v1.ClosePortResponse
+	17, // 30: sandbox.v1.SandboxService.ListOpenPort:output_type -> sandbox.v1.ListOpenPortResponse
+	23, // [23:31] is the sub-list for method output_type
+	15, // [15:23] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_sandbox_v1_sandbox_proto_init() }

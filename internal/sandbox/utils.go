@@ -1,7 +1,8 @@
 package sandbox
 
 import (
-	"errors"
+	"fmt"
+	"strings"
 
 	sandboxv1 "e2b/gen/sandbox/v1"
 
@@ -24,7 +25,7 @@ func PodPhaseToSandboxStateAdapter(status corev1.PodPhase) sandboxv1.SandboxStat
 	return sandboxStatus
 }
 
-func protocolAdapter(protocol sandboxv1.Protocol) (corev1.Protocol, error) {
+func K8sProtocolAdapter(protocol sandboxv1.Protocol) corev1.Protocol {
 	var coreProtocol corev1.Protocol
 	switch protocol {
 	case sandboxv1.Protocol_PROTOCOL_TCP:
@@ -33,8 +34,25 @@ func protocolAdapter(protocol sandboxv1.Protocol) (corev1.Protocol, error) {
 		coreProtocol = corev1.ProtocolUDP
 	case sandboxv1.Protocol_PROTOCOL_SCTP:
 		coreProtocol = corev1.ProtocolSCTP
-	default:
-		return coreProtocol, errors.New("invalid protocol")
 	}
-	return coreProtocol, nil
+	return coreProtocol
+}
+
+func SandboxProtocolAdapter(protocol corev1.Protocol) sandboxv1.Protocol {
+	var sandboxProtocol sandboxv1.Protocol
+	switch protocol {
+	case corev1.ProtocolTCP:
+		sandboxProtocol = sandboxv1.Protocol_PROTOCOL_TCP
+	case corev1.ProtocolUDP:
+		sandboxProtocol = sandboxv1.Protocol_PROTOCOL_UDP
+	case corev1.ProtocolSCTP:
+		sandboxProtocol = sandboxv1.Protocol_PROTOCOL_SCTP
+	}
+	return sandboxProtocol
+}
+
+func GetPortName(port *sandboxv1.PortInfo) string {
+	name := strings.ToLower(port.Protocol.String())
+	formattedName := strings.ReplaceAll(name, "_", "-")
+	return strings.ToLower(fmt.Sprintf("%s-%d", formattedName, port.PortNumber))
 }

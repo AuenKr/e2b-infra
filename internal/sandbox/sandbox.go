@@ -39,16 +39,15 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	cmds := strings.Fields(req.GetCmd())
 	args := strings.Fields(req.GetArgs())
 
+	// TODO: For future, removal depend on Requirement
+	// This fills like unnecessary, as we do not need this for now
+	// Service linking is not depended on this
 	ports := make([]corev1.ContainerPort, len(req.GetPorts()))
 	for _, port := range req.GetPorts() {
-		protocol, err := protocolAdapter(port.Protocol)
-		if err != nil {
-			return nil, err
-		}
 		ports[0] = corev1.ContainerPort{
-			Name:          fmt.Sprintf("%s-%d", req.Id, port.Port),
-			Protocol:      protocol,
-			ContainerPort: int32(port.Port),
+			Name:          GetPortName(port),
+			Protocol:      K8sProtocolAdapter(port.Protocol),
+			ContainerPort: int32(port.PortNumber),
 		}
 	}
 
@@ -76,14 +75,12 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	}
 
 	podConfg := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "",
-			APIVersion: "",
-		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        req.GetId(),
-			Namespace:   s.Config.K8sNamespace,
-			Labels:      map[string]string{},
+			Name:      req.GetId(),
+			Namespace: s.Config.K8sNamespace,
+			Labels: map[string]string{
+				"id": req.GetId(),
+			},
 			Annotations: map[string]string{},
 		},
 		Spec: corev1.PodSpec{
@@ -97,9 +94,33 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 			Tolerations:         []corev1.Toleration{},
 		},
 	}
-	opts := metav1.CreateOptions{}
 
-	podInfo, err := k8core.Pods(s.Config.K8sNamespace).Create(ctx, &podConfg, opts)
+	podInfo, err := k8core.Pods(s.Config.K8sNamespace).Create(ctx, &podConfg, metav1.CreateOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	// Service creation
+	servicePorts := make([]corev1.ServicePort, len(req.Ports))
+	for i, port := range req.Ports {
+		servicePorts[i] = corev1.ServicePort{
+			Name:     GetPortName(port),
+			Protocol: K8sProtocolAdapter(port.Protocol),
+			Port:     int32(port.PortNumber),
+		}
+	}
+
+	_, err = k8core.Services(s.Config.K8sNamespace).Create(ctx, &corev1.Service{
+		Spec: corev1.ServiceSpec{
+			Ports: servicePorts,
+			Selector: map[string]string{
+				"id": req.Id,
+			},
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: req.Id,
+		},
+	}, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +140,9 @@ func (s *SandboxServer) StopSandbox(ctx context.Context, req *sandboxv1.StopSand
 	k8core := s.K8sClient.CoreV1()
 
 	if err := k8core.Pods(s.Config.K8sNamespace).Delete(ctx, req.GetId(), metav1.DeleteOptions{}); err != nil {
+		return nil, err
+	}
+	if err := k8core.Services(s.Config.K8sNamespace).Delete(ctx, req.GetId(), metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
 	return &sandboxv1.StopSandboxResponse{
