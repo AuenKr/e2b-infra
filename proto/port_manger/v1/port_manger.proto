@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package port_manger.v1;
+
+import "buf/validate/validate.proto";
+import "common/v1/common.proto";
+
+service PortMangerService {
+  // TODO:
+  // Instead of creating single port at a time.
+  // Make a Batch of port to open and close
+
+  // And when open or close port: get the resource, reconsile it and update on server
+  rpc OpenPort(OpenPortRequest) returns (OpenPortResponse);
+  rpc ClosePort(ClosePortRequest) returns (ClosePortResponse);
+
+  rpc ListOpenPort(ListOpenPortRequest) returns (ListOpenPortResponse);
+}
+
+message OpenPortRequest {
+  string id = 1 [(buf.validate.field).required = true];
+  common.v1.PortInfo port = 2 [(buf.validate.field).required = true];
+}
+
+message OpenPortResponse {
+  common.v1.PortInfo port = 1;
+}
+
+message ClosePortRequest {
+  string id = 1 [(buf.validate.field).required = true];
+  common.v1.PortInfo port = 2 [(buf.validate.field).required = true];
+}
+
+message ClosePortResponse {
+  common.v1.PortInfo port = 1;
+}
+
+message ListOpenPortRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message ListOpenPortResponse {
+  repeated common.v1.PortInfo ports = 1;
+}

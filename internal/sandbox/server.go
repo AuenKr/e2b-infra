@@ -48,7 +48,6 @@ func NewSandboxServer(in SandboxServerParams) *SandboxServer {
 	}
 }
 
-// For compile time error
 var _ sandboxv1connect.SandboxServiceHandler = (*SandboxServer)(nil)
 
 type SandboxServerRouteParams struct {
@@ -65,5 +64,9 @@ func NewSandboxServerRoute(in SandboxServerRouteParams) server.Route {
 			validate.NewInterceptor(),
 		),
 	)
-	return server.Route{Path: p, Handler: h}
+	return server.Route{
+		ServiceName: sandboxv1connect.SandboxServiceName,
+		Path:        p,
+		Handler:     h,
+	}
 }

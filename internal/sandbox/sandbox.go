@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	commonv1 "e2b/gen/common/v1"
 	sandboxv1 "e2b/gen/sandbox/v1"
 	"e2b/pkg/config"
 
@@ -130,7 +131,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	}
 
 	return &sandboxv1.StartSandboxResponse{
-		Sandbox: &sandboxv1.SandboxInfo{
+		Sandbox: &commonv1.SandboxInfo{
 			Id:     podInfo.Name,
 			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 		},
@@ -154,9 +155,9 @@ func (s *SandboxServer) StopSandbox(ctx context.Context, req *sandboxv1.StopSand
 		return nil, err
 	}
 	return &sandboxv1.StopSandboxResponse{
-		Sandbox: &sandboxv1.SandboxInfo{
+		Sandbox: &commonv1.SandboxInfo{
 			Id:     req.Id,
-			Status: sandboxv1.SandboxStatus_SANDBOX_STATUS_STOPPED,
+			Status: commonv1.SandboxStatus_SANDBOX_STATUS_STOPPED,
 		},
 	}, nil
 }
@@ -186,11 +187,11 @@ func (s *SandboxServer) GetSandbox(ctx context.Context, req *sandboxv1.GetSandbo
 	//
 
 	return &sandboxv1.GetSandboxResponse{
-		Sandbox: &sandboxv1.SandboxInfo{
+		Sandbox: &commonv1.SandboxInfo{
 			Id:     podInfo.Name,
 			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 		},
-		Resource: &sandboxv1.Specification{
+		Resource: &commonv1.Specification{
 			Cpu:    uint32(cpuMilli),
 			Memory: uint32(memoryBytes / (1024 * 1024)), // In MB
 		},
@@ -206,9 +207,9 @@ func (s *SandboxServer) ListSandbox(ctx context.Context, req *sandboxv1.ListSand
 	if err != nil {
 		return nil, err
 	}
-	sandboxs := make([]*sandboxv1.SandboxInfo, len(podsInfo.Items))
+	sandboxs := make([]*commonv1.SandboxInfo, len(podsInfo.Items))
 	for i, podInfo := range podsInfo.Items {
-		sandboxs[i] = &sandboxv1.SandboxInfo{
+		sandboxs[i] = &commonv1.SandboxInfo{
 			Id:     podInfo.Name,
 			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 		}

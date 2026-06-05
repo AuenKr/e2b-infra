@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package common.v1;
+
+import "buf/validate/validate.proto";
+
+// TODO: Only support HTTP, HTTPS, gRPC, WebSocket
+// No direct protocol running TCP or UDP server
+// K8s ingress controller limitation
+// Will look into future as most of people only need HTTP, gRPC, WebSocket
+enum Protocol {
+  PROTOCOL_UNSPECIFIED = 0;
+  PROTOCOL_TCP = 1;
+  PROTOCOL_UDP = 2;
+  PROTOCOL_SCTP = 3;
+}
+
+message PortInfo {
+  uint32 port_number = 1 [
+    (buf.validate.field).uint32 = {
+      gt: 0
+      lte: 65535
+    },
+    (buf.validate.field).required = true
+  ];
+  Protocol protocol = 2 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).required = true
+  ];
+  string hostname = 3 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).string.hostname = true
+  ];
+}
+
+message SandboxInfo {
+  // Name will be unique in each namespace, it will act as id
+  string id = 1;
+  SandboxStatus status = 2 [(buf.validate.field).enum.defined_only = true];
+}
+
+enum SandboxStatus {
+  SANDBOX_STATUS_UNSPECIFIED = 0;
+  SANDBOX_STATUS_STARTING = 1;
+  SANDBOX_STATUS_RUNNING = 2;
+  SANDBOX_STATUS_STOPPING = 3;
+  SANDBOX_STATUS_STOPPED = 4;
+  SANDBOX_STATUS_ERROR = 5;
+}
+
+// Make sure to update the default limit Min and Max limit of CPU and Memory in config
+message Specification {
+  // In millicore
+  uint32 cpu = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).uint32 = {
+      gt: 0
+      lte: 4000 // 4 CPU
+    }
+  ];
+  // In MB
+  uint32 memory = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).uint32 = {
+      gt: 0
+      lte: 8192 // 8GB
+    }
+  ];
+  // In GB
+  uint32 storage = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).uint32 = {
+      gt: 1
+      lte: 102400 // 100GB
+    }
+  ];
+}

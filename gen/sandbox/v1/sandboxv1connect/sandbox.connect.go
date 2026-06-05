@@ -48,14 +48,6 @@ const (
 	// SandboxServiceSendCommandProcedure is the fully-qualified name of the SandboxService's
 	// SendCommand RPC.
 	SandboxServiceSendCommandProcedure = "/sandbox.v1.SandboxService/SendCommand"
-	// SandboxServiceOpenPortProcedure is the fully-qualified name of the SandboxService's OpenPort RPC.
-	SandboxServiceOpenPortProcedure = "/sandbox.v1.SandboxService/OpenPort"
-	// SandboxServiceClosePortProcedure is the fully-qualified name of the SandboxService's ClosePort
-	// RPC.
-	SandboxServiceClosePortProcedure = "/sandbox.v1.SandboxService/ClosePort"
-	// SandboxServiceListOpenPortProcedure is the fully-qualified name of the SandboxService's
-	// ListOpenPort RPC.
-	SandboxServiceListOpenPortProcedure = "/sandbox.v1.SandboxService/ListOpenPort"
 )
 
 // SandboxServiceClient is a client for the sandbox.v1.SandboxService service.
@@ -68,10 +60,6 @@ type SandboxServiceClient interface {
 	GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error)
 	ListSandbox(context.Context, *v1.ListSandboxRequest) (*v1.ListSandboxResponse, error)
 	SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error)
-	// And when open or close port: get the resource, reconsile it and update on server
-	OpenPort(context.Context, *v1.OpenPortRequest) (*v1.OpenPortResponse, error)
-	ClosePort(context.Context, *v1.ClosePortRequest) (*v1.ClosePortResponse, error)
-	ListOpenPort(context.Context, *v1.ListOpenPortRequest) (*v1.ListOpenPortResponse, error)
 }
 
 // NewSandboxServiceClient constructs a client for the sandbox.v1.SandboxService service. By
@@ -115,24 +103,6 @@ func NewSandboxServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(sandboxServiceMethods.ByName("SendCommand")),
 			connect.WithClientOptions(opts...),
 		),
-		openPort: connect.NewClient[v1.OpenPortRequest, v1.OpenPortResponse](
-			httpClient,
-			baseURL+SandboxServiceOpenPortProcedure,
-			connect.WithSchema(sandboxServiceMethods.ByName("OpenPort")),
-			connect.WithClientOptions(opts...),
-		),
-		closePort: connect.NewClient[v1.ClosePortRequest, v1.ClosePortResponse](
-			httpClient,
-			baseURL+SandboxServiceClosePortProcedure,
-			connect.WithSchema(sandboxServiceMethods.ByName("ClosePort")),
-			connect.WithClientOptions(opts...),
-		),
-		listOpenPort: connect.NewClient[v1.ListOpenPortRequest, v1.ListOpenPortResponse](
-			httpClient,
-			baseURL+SandboxServiceListOpenPortProcedure,
-			connect.WithSchema(sandboxServiceMethods.ByName("ListOpenPort")),
-			connect.WithClientOptions(opts...),
-		),
 	}
 }
 
@@ -143,9 +113,6 @@ type sandboxServiceClient struct {
 	getSandbox   *connect.Client[v1.GetSandboxRequest, v1.GetSandboxResponse]
 	listSandbox  *connect.Client[v1.ListSandboxRequest, v1.ListSandboxResponse]
 	sendCommand  *connect.Client[v1.SendCommandRequest, v1.SendCommandResponse]
-	openPort     *connect.Client[v1.OpenPortRequest, v1.OpenPortResponse]
-	closePort    *connect.Client[v1.ClosePortRequest, v1.ClosePortResponse]
-	listOpenPort *connect.Client[v1.ListOpenPortRequest, v1.ListOpenPortResponse]
 }
 
 // StartSandbox calls sandbox.v1.SandboxService.StartSandbox.
@@ -193,33 +160,6 @@ func (c *sandboxServiceClient) SendCommand(ctx context.Context, req *v1.SendComm
 	return nil, err
 }
 
-// OpenPort calls sandbox.v1.SandboxService.OpenPort.
-func (c *sandboxServiceClient) OpenPort(ctx context.Context, req *v1.OpenPortRequest) (*v1.OpenPortResponse, error) {
-	response, err := c.openPort.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// ClosePort calls sandbox.v1.SandboxService.ClosePort.
-func (c *sandboxServiceClient) ClosePort(ctx context.Context, req *v1.ClosePortRequest) (*v1.ClosePortResponse, error) {
-	response, err := c.closePort.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// ListOpenPort calls sandbox.v1.SandboxService.ListOpenPort.
-func (c *sandboxServiceClient) ListOpenPort(ctx context.Context, req *v1.ListOpenPortRequest) (*v1.ListOpenPortResponse, error) {
-	response, err := c.listOpenPort.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
 // SandboxServiceHandler is an implementation of the sandbox.v1.SandboxService service.
 type SandboxServiceHandler interface {
 	// At starting we create all the resources when the standbox is starting
@@ -230,10 +170,6 @@ type SandboxServiceHandler interface {
 	GetSandbox(context.Context, *v1.GetSandboxRequest) (*v1.GetSandboxResponse, error)
 	ListSandbox(context.Context, *v1.ListSandboxRequest) (*v1.ListSandboxResponse, error)
 	SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error)
-	// And when open or close port: get the resource, reconsile it and update on server
-	OpenPort(context.Context, *v1.OpenPortRequest) (*v1.OpenPortResponse, error)
-	ClosePort(context.Context, *v1.ClosePortRequest) (*v1.ClosePortResponse, error)
-	ListOpenPort(context.Context, *v1.ListOpenPortRequest) (*v1.ListOpenPortResponse, error)
 }
 
 // NewSandboxServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -273,24 +209,6 @@ func NewSandboxServiceHandler(svc SandboxServiceHandler, opts ...connect.Handler
 		connect.WithSchema(sandboxServiceMethods.ByName("SendCommand")),
 		connect.WithHandlerOptions(opts...),
 	)
-	sandboxServiceOpenPortHandler := connect.NewUnaryHandlerSimple(
-		SandboxServiceOpenPortProcedure,
-		svc.OpenPort,
-		connect.WithSchema(sandboxServiceMethods.ByName("OpenPort")),
-		connect.WithHandlerOptions(opts...),
-	)
-	sandboxServiceClosePortHandler := connect.NewUnaryHandlerSimple(
-		SandboxServiceClosePortProcedure,
-		svc.ClosePort,
-		connect.WithSchema(sandboxServiceMethods.ByName("ClosePort")),
-		connect.WithHandlerOptions(opts...),
-	)
-	sandboxServiceListOpenPortHandler := connect.NewUnaryHandlerSimple(
-		SandboxServiceListOpenPortProcedure,
-		svc.ListOpenPort,
-		connect.WithSchema(sandboxServiceMethods.ByName("ListOpenPort")),
-		connect.WithHandlerOptions(opts...),
-	)
 	return "/sandbox.v1.SandboxService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SandboxServiceStartSandboxProcedure:
@@ -303,12 +221,6 @@ func NewSandboxServiceHandler(svc SandboxServiceHandler, opts ...connect.Handler
 			sandboxServiceListSandboxHandler.ServeHTTP(w, r)
 		case SandboxServiceSendCommandProcedure:
 			sandboxServiceSendCommandHandler.ServeHTTP(w, r)
-		case SandboxServiceOpenPortProcedure:
-			sandboxServiceOpenPortHandler.ServeHTTP(w, r)
-		case SandboxServiceClosePortProcedure:
-			sandboxServiceClosePortHandler.ServeHTTP(w, r)
-		case SandboxServiceListOpenPortProcedure:
-			sandboxServiceListOpenPortHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -336,16 +248,4 @@ func (UnimplementedSandboxServiceHandler) ListSandbox(context.Context, *v1.ListS
 
 func (UnimplementedSandboxServiceHandler) SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.SendCommand is not implemented"))
-}
-
-func (UnimplementedSandboxServiceHandler) OpenPort(context.Context, *v1.OpenPortRequest) (*v1.OpenPortResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.OpenPort is not implemented"))
-}
-
-func (UnimplementedSandboxServiceHandler) ClosePort(context.Context, *v1.ClosePortRequest) (*v1.ClosePortResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.ClosePort is not implemented"))
-}
-
-func (UnimplementedSandboxServiceHandler) ListOpenPort(context.Context, *v1.ListOpenPortRequest) (*v1.ListOpenPortResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("sandbox.v1.SandboxService.ListOpenPort is not implemented"))
 }

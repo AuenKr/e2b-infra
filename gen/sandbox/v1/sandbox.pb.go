@@ -8,6 +8,7 @@ package sandboxv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	v1 "e2b/gen/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,126 +23,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// TODO: Only support HTTP, HTTPS, gRPC, WebSocket
-// No direct protocol running TCP or UDP server
-// K8s ingress controller limitation
-// Will look into future as most of people only need HTTP, gRPC, WebSocket
-type Protocol int32
-
-const (
-	Protocol_PROTOCOL_UNSPECIFIED Protocol = 0
-	Protocol_PROTOCOL_TCP         Protocol = 1
-	Protocol_PROTOCOL_UDP         Protocol = 2
-	Protocol_PROTOCOL_SCTP        Protocol = 3
-)
-
-// Enum value maps for Protocol.
-var (
-	Protocol_name = map[int32]string{
-		0: "PROTOCOL_UNSPECIFIED",
-		1: "PROTOCOL_TCP",
-		2: "PROTOCOL_UDP",
-		3: "PROTOCOL_SCTP",
-	}
-	Protocol_value = map[string]int32{
-		"PROTOCOL_UNSPECIFIED": 0,
-		"PROTOCOL_TCP":         1,
-		"PROTOCOL_UDP":         2,
-		"PROTOCOL_SCTP":        3,
-	}
-)
-
-func (x Protocol) Enum() *Protocol {
-	p := new(Protocol)
-	*p = x
-	return p
-}
-
-func (x Protocol) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (Protocol) Descriptor() protoreflect.EnumDescriptor {
-	return file_sandbox_v1_sandbox_proto_enumTypes[0].Descriptor()
-}
-
-func (Protocol) Type() protoreflect.EnumType {
-	return &file_sandbox_v1_sandbox_proto_enumTypes[0]
-}
-
-func (x Protocol) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use Protocol.Descriptor instead.
-func (Protocol) EnumDescriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{0}
-}
-
-type SandboxStatus int32
-
-const (
-	SandboxStatus_SANDBOX_STATUS_UNSPECIFIED SandboxStatus = 0
-	SandboxStatus_SANDBOX_STATUS_STARTING    SandboxStatus = 1
-	SandboxStatus_SANDBOX_STATUS_RUNNING     SandboxStatus = 2
-	SandboxStatus_SANDBOX_STATUS_STOPPING    SandboxStatus = 3
-	SandboxStatus_SANDBOX_STATUS_STOPPED     SandboxStatus = 4
-	SandboxStatus_SANDBOX_STATUS_ERROR       SandboxStatus = 5
-)
-
-// Enum value maps for SandboxStatus.
-var (
-	SandboxStatus_name = map[int32]string{
-		0: "SANDBOX_STATUS_UNSPECIFIED",
-		1: "SANDBOX_STATUS_STARTING",
-		2: "SANDBOX_STATUS_RUNNING",
-		3: "SANDBOX_STATUS_STOPPING",
-		4: "SANDBOX_STATUS_STOPPED",
-		5: "SANDBOX_STATUS_ERROR",
-	}
-	SandboxStatus_value = map[string]int32{
-		"SANDBOX_STATUS_UNSPECIFIED": 0,
-		"SANDBOX_STATUS_STARTING":    1,
-		"SANDBOX_STATUS_RUNNING":     2,
-		"SANDBOX_STATUS_STOPPING":    3,
-		"SANDBOX_STATUS_STOPPED":     4,
-		"SANDBOX_STATUS_ERROR":       5,
-	}
-)
-
-func (x SandboxStatus) Enum() *SandboxStatus {
-	p := new(SandboxStatus)
-	*p = x
-	return p
-}
-
-func (x SandboxStatus) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (SandboxStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_sandbox_v1_sandbox_proto_enumTypes[1].Descriptor()
-}
-
-func (SandboxStatus) Type() protoreflect.EnumType {
-	return &file_sandbox_v1_sandbox_proto_enumTypes[1]
-}
-
-func (x SandboxStatus) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use SandboxStatus.Descriptor instead.
-func (SandboxStatus) EnumDescriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{1}
-}
-
 type StartSandboxRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// name of pod
 	Id            string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Image         string            `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
-	Requirement   *Specification    `protobuf:"bytes,3,opt,name=requirement,proto3" json:"requirement,omitempty"`
+	Requirement   *v1.Specification `protobuf:"bytes,3,opt,name=requirement,proto3" json:"requirement,omitempty"`
 	Env           map[string]string `protobuf:"bytes,4,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Cmd           string            `protobuf:"bytes,5,opt,name=cmd,proto3" json:"cmd,omitempty"`
 	Args          string            `protobuf:"bytes,6,opt,name=args,proto3" json:"args,omitempty"`
@@ -193,7 +80,7 @@ func (x *StartSandboxRequest) GetImage() string {
 	return ""
 }
 
-func (x *StartSandboxRequest) GetRequirement() *Specification {
+func (x *StartSandboxRequest) GetRequirement() *v1.Specification {
 	if x != nil {
 		return x.Requirement
 	}
@@ -223,7 +110,7 @@ func (x *StartSandboxRequest) GetArgs() string {
 
 type StartSandboxResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Sandbox       *SandboxInfo           `protobuf:"bytes,1,opt,name=sandbox,proto3" json:"sandbox,omitempty"`
+	Sandbox       *v1.SandboxInfo        `protobuf:"bytes,1,opt,name=sandbox,proto3" json:"sandbox,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -258,7 +145,7 @@ func (*StartSandboxResponse) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *StartSandboxResponse) GetSandbox() *SandboxInfo {
+func (x *StartSandboxResponse) GetSandbox() *v1.SandboxInfo {
 	if x != nil {
 		return x.Sandbox
 	}
@@ -311,8 +198,8 @@ func (x *GetSandboxRequest) GetId() string {
 
 type GetSandboxResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Sandbox       *SandboxInfo           `protobuf:"bytes,1,opt,name=sandbox,proto3" json:"sandbox,omitempty"`
-	Resource      *Specification         `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
+	Sandbox       *v1.SandboxInfo        `protobuf:"bytes,1,opt,name=sandbox,proto3" json:"sandbox,omitempty"`
+	Resource      *v1.Specification      `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -347,14 +234,14 @@ func (*GetSandboxResponse) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetSandboxResponse) GetSandbox() *SandboxInfo {
+func (x *GetSandboxResponse) GetSandbox() *v1.SandboxInfo {
 	if x != nil {
 		return x.Sandbox
 	}
 	return nil
 }
 
-func (x *GetSandboxResponse) GetResource() *Specification {
+func (x *GetSandboxResponse) GetResource() *v1.Specification {
 	if x != nil {
 		return x.Resource
 	}
@@ -407,7 +294,7 @@ func (x *StopSandboxRequest) GetId() string {
 
 type StopSandboxResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Sandbox       *SandboxInfo           `protobuf:"bytes,1,opt,name=sandbox,proto3" json:"sandbox,omitempty"`
+	Sandbox       *v1.SandboxInfo        `protobuf:"bytes,1,opt,name=sandbox,proto3" json:"sandbox,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -442,7 +329,7 @@ func (*StopSandboxResponse) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *StopSandboxResponse) GetSandbox() *SandboxInfo {
+func (x *StopSandboxResponse) GetSandbox() *v1.SandboxInfo {
 	if x != nil {
 		return x.Sandbox
 	}
@@ -487,7 +374,7 @@ func (*ListSandboxRequest) Descriptor() ([]byte, []int) {
 
 type ListSandboxResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Sandboxs      []*SandboxInfo         `protobuf:"bytes,1,rep,name=sandboxs,proto3" json:"sandboxs,omitempty"`
+	Sandboxs      []*v1.SandboxInfo      `protobuf:"bytes,1,rep,name=sandboxs,proto3" json:"sandboxs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -522,7 +409,7 @@ func (*ListSandboxResponse) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *ListSandboxResponse) GetSandboxs() []*SandboxInfo {
+func (x *ListSandboxResponse) GetSandboxs() []*v1.SandboxInfo {
 	if x != nil {
 		return x.Sandboxs
 	}
@@ -635,550 +522,49 @@ func (x *SendCommandResponse) GetStderr() string {
 	return ""
 }
 
-type OpenPortRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Port          *PortInfo              `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *OpenPortRequest) Reset() {
-	*x = OpenPortRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OpenPortRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OpenPortRequest) ProtoMessage() {}
-
-func (x *OpenPortRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OpenPortRequest.ProtoReflect.Descriptor instead.
-func (*OpenPortRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *OpenPortRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *OpenPortRequest) GetPort() *PortInfo {
-	if x != nil {
-		return x.Port
-	}
-	return nil
-}
-
-type OpenPortResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Port          *PortInfo              `protobuf:"bytes,1,opt,name=port,proto3" json:"port,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *OpenPortResponse) Reset() {
-	*x = OpenPortResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OpenPortResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OpenPortResponse) ProtoMessage() {}
-
-func (x *OpenPortResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OpenPortResponse.ProtoReflect.Descriptor instead.
-func (*OpenPortResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *OpenPortResponse) GetPort() *PortInfo {
-	if x != nil {
-		return x.Port
-	}
-	return nil
-}
-
-type ClosePortRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Port          *PortInfo              `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ClosePortRequest) Reset() {
-	*x = ClosePortRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ClosePortRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ClosePortRequest) ProtoMessage() {}
-
-func (x *ClosePortRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ClosePortRequest.ProtoReflect.Descriptor instead.
-func (*ClosePortRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *ClosePortRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *ClosePortRequest) GetPort() *PortInfo {
-	if x != nil {
-		return x.Port
-	}
-	return nil
-}
-
-type ClosePortResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Port          *PortInfo              `protobuf:"bytes,1,opt,name=port,proto3" json:"port,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ClosePortResponse) Reset() {
-	*x = ClosePortResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ClosePortResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ClosePortResponse) ProtoMessage() {}
-
-func (x *ClosePortResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ClosePortResponse.ProtoReflect.Descriptor instead.
-func (*ClosePortResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *ClosePortResponse) GetPort() *PortInfo {
-	if x != nil {
-		return x.Port
-	}
-	return nil
-}
-
-type ListOpenPortRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListOpenPortRequest) Reset() {
-	*x = ListOpenPortRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[14]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListOpenPortRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListOpenPortRequest) ProtoMessage() {}
-
-func (x *ListOpenPortRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[14]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListOpenPortRequest.ProtoReflect.Descriptor instead.
-func (*ListOpenPortRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{14}
-}
-
-func (x *ListOpenPortRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-type ListOpenPortResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ports         []*PortInfo            `protobuf:"bytes,1,rep,name=ports,proto3" json:"ports,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListOpenPortResponse) Reset() {
-	*x = ListOpenPortResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListOpenPortResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListOpenPortResponse) ProtoMessage() {}
-
-func (x *ListOpenPortResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListOpenPortResponse.ProtoReflect.Descriptor instead.
-func (*ListOpenPortResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *ListOpenPortResponse) GetPorts() []*PortInfo {
-	if x != nil {
-		return x.Ports
-	}
-	return nil
-}
-
-type PortInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PortNumber    uint32                 `protobuf:"varint,1,opt,name=port_number,json=portNumber,proto3" json:"port_number,omitempty"`
-	Protocol      Protocol               `protobuf:"varint,2,opt,name=protocol,proto3,enum=sandbox.v1.Protocol" json:"protocol,omitempty"`
-	Hostname      string                 `protobuf:"bytes,3,opt,name=hostname,proto3" json:"hostname,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PortInfo) Reset() {
-	*x = PortInfo{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[16]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PortInfo) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PortInfo) ProtoMessage() {}
-
-func (x *PortInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[16]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PortInfo.ProtoReflect.Descriptor instead.
-func (*PortInfo) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *PortInfo) GetPortNumber() uint32 {
-	if x != nil {
-		return x.PortNumber
-	}
-	return 0
-}
-
-func (x *PortInfo) GetProtocol() Protocol {
-	if x != nil {
-		return x.Protocol
-	}
-	return Protocol_PROTOCOL_UNSPECIFIED
-}
-
-func (x *PortInfo) GetHostname() string {
-	if x != nil {
-		return x.Hostname
-	}
-	return ""
-}
-
-type SandboxInfo struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Name will be unique in each namespace, it will act as id
-	Id            string        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        SandboxStatus `protobuf:"varint,2,opt,name=status,proto3,enum=sandbox.v1.SandboxStatus" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SandboxInfo) Reset() {
-	*x = SandboxInfo{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SandboxInfo) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SandboxInfo) ProtoMessage() {}
-
-func (x *SandboxInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SandboxInfo.ProtoReflect.Descriptor instead.
-func (*SandboxInfo) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{17}
-}
-
-func (x *SandboxInfo) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *SandboxInfo) GetStatus() SandboxStatus {
-	if x != nil {
-		return x.Status
-	}
-	return SandboxStatus_SANDBOX_STATUS_UNSPECIFIED
-}
-
-// Make sure to update the default limit Min and Max limit of CPU and Memory in config
-type Specification struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// In millicore
-	Cpu uint32 `protobuf:"varint,1,opt,name=cpu,proto3" json:"cpu,omitempty"`
-	// In MB
-	Memory uint32 `protobuf:"varint,2,opt,name=memory,proto3" json:"memory,omitempty"`
-	// In GB
-	Storage       uint32 `protobuf:"varint,3,opt,name=storage,proto3" json:"storage,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Specification) Reset() {
-	*x = Specification{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Specification) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Specification) ProtoMessage() {}
-
-func (x *Specification) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Specification.ProtoReflect.Descriptor instead.
-func (*Specification) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *Specification) GetCpu() uint32 {
-	if x != nil {
-		return x.Cpu
-	}
-	return 0
-}
-
-func (x *Specification) GetMemory() uint32 {
-	if x != nil {
-		return x.Memory
-	}
-	return 0
-}
-
-func (x *Specification) GetStorage() uint32 {
-	if x != nil {
-		return x.Storage
-	}
-	return 0
-}
-
 var File_sandbox_v1_sandbox_proto protoreflect.FileDescriptor
 
 const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\n" +
 	"\x18sandbox/v1/sandbox.proto\x12\n" +
-	"sandbox.v1\x1a\x1bbuf/validate/validate.proto\"\xc2\x02\n" +
+	"sandbox.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\"\xc1\x02\n" +
 	"\x13StartSandboxRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\x1c\n" +
-	"\x05image\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05image\x12C\n" +
-	"\vrequirement\x18\x03 \x01(\v2\x19.sandbox.v1.SpecificationB\x06\xbaH\x03\xc8\x01\x00R\vrequirement\x12B\n" +
+	"\x05image\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05image\x12B\n" +
+	"\vrequirement\x18\x03 \x01(\v2\x18.common.v1.SpecificationB\x06\xbaH\x03\xc8\x01\x00R\vrequirement\x12B\n" +
 	"\x03env\x18\x04 \x03(\v2(.sandbox.v1.StartSandboxRequest.EnvEntryB\x06\xbaH\x03\xc8\x01\x00R\x03env\x12\x18\n" +
 	"\x03cmd\x18\x05 \x01(\tB\x06\xbaH\x03\xc8\x01\x00R\x03cmd\x12\x1a\n" +
 	"\x04args\x18\x06 \x01(\tB\x06\xbaH\x03\xc8\x01\x00R\x04args\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"I\n" +
-	"\x14StartSandboxResponse\x121\n" +
-	"\asandbox\x18\x01 \x01(\v2\x17.sandbox.v1.SandboxInfoR\asandbox\"+\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"H\n" +
+	"\x14StartSandboxResponse\x120\n" +
+	"\asandbox\x18\x01 \x01(\v2\x16.common.v1.SandboxInfoR\asandbox\"+\n" +
 	"\x11GetSandboxRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"~\n" +
-	"\x12GetSandboxResponse\x121\n" +
-	"\asandbox\x18\x01 \x01(\v2\x17.sandbox.v1.SandboxInfoR\asandbox\x125\n" +
-	"\bresource\x18\x02 \x01(\v2\x19.sandbox.v1.SpecificationR\bresource\",\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"|\n" +
+	"\x12GetSandboxResponse\x120\n" +
+	"\asandbox\x18\x01 \x01(\v2\x16.common.v1.SandboxInfoR\asandbox\x124\n" +
+	"\bresource\x18\x02 \x01(\v2\x18.common.v1.SpecificationR\bresource\",\n" +
 	"\x12StopSandboxRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"H\n" +
-	"\x13StopSandboxResponse\x121\n" +
-	"\asandbox\x18\x01 \x01(\v2\x17.sandbox.v1.SandboxInfoR\asandbox\"\x14\n" +
-	"\x12ListSandboxRequest\"J\n" +
-	"\x13ListSandboxResponse\x123\n" +
-	"\bsandboxs\x18\x01 \x03(\v2\x17.sandbox.v1.SandboxInfoR\bsandboxs\"N\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"G\n" +
+	"\x13StopSandboxResponse\x120\n" +
+	"\asandbox\x18\x01 \x01(\v2\x16.common.v1.SandboxInfoR\asandbox\"\x14\n" +
+	"\x12ListSandboxRequest\"I\n" +
+	"\x13ListSandboxResponse\x122\n" +
+	"\bsandboxs\x18\x01 \x03(\v2\x16.common.v1.SandboxInfoR\bsandboxs\"N\n" +
 	"\x12SendCommandRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12 \n" +
 	"\acommand\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\acommand\"E\n" +
 	"\x13SendCommandResponse\x12\x16\n" +
 	"\x06stdout\x18\x01 \x01(\tR\x06stdout\x12\x16\n" +
-	"\x06stderr\x18\x02 \x01(\tR\x06stderr\"[\n" +
-	"\x0fOpenPortRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x120\n" +
-	"\x04port\x18\x02 \x01(\v2\x14.sandbox.v1.PortInfoB\x06\xbaH\x03\xc8\x01\x01R\x04port\"<\n" +
-	"\x10OpenPortResponse\x12(\n" +
-	"\x04port\x18\x01 \x01(\v2\x14.sandbox.v1.PortInfoR\x04port\"\\\n" +
-	"\x10ClosePortRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\x120\n" +
-	"\x04port\x18\x02 \x01(\v2\x14.sandbox.v1.PortInfoB\x06\xbaH\x03\xc8\x01\x01R\x04port\"=\n" +
-	"\x11ClosePortResponse\x12(\n" +
-	"\x04port\x18\x01 \x01(\v2\x14.sandbox.v1.PortInfoR\x04port\"-\n" +
-	"\x13ListOpenPortRequest\x12\x16\n" +
-	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"B\n" +
-	"\x14ListOpenPortResponse\x12*\n" +
-	"\x05ports\x18\x01 \x03(\v2\x14.sandbox.v1.PortInfoR\x05ports\"\xa2\x01\n" +
-	"\bPortInfo\x12/\n" +
-	"\vport_number\x18\x01 \x01(\rB\x0e\xbaH\v\xc8\x01\x01*\x06\x18\xff\xff\x03 \x00R\n" +
-	"portNumber\x12=\n" +
-	"\bprotocol\x18\x02 \x01(\x0e2\x14.sandbox.v1.ProtocolB\v\xbaH\b\xc8\x01\x01\x82\x01\x02\x10\x01R\bprotocol\x12&\n" +
-	"\bhostname\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xd8\x01\x01r\x02h\x01R\bhostname\"Z\n" +
-	"\vSandboxInfo\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12;\n" +
-	"\x06status\x18\x02 \x01(\x0e2\x19.sandbox.v1.SandboxStatusB\b\xbaH\x05\x82\x01\x02\x10\x01R\x06status\"\x81\x01\n" +
-	"\rSpecification\x12\x1f\n" +
-	"\x03cpu\x18\x01 \x01(\rB\r\xbaH\n" +
-	"\xc8\x01\x01*\x05\x18\xa0\x1f \x00R\x03cpu\x12%\n" +
-	"\x06memory\x18\x02 \x01(\rB\r\xbaH\n" +
-	"\xc8\x01\x01*\x05\x18\x80@ \x00R\x06memory\x12(\n" +
-	"\astorage\x18\x03 \x01(\rB\x0e\xbaH\v\xc8\x01\x01*\x06\x18\x80\xa0\x06 \x01R\astorage*[\n" +
-	"\bProtocol\x12\x18\n" +
-	"\x14PROTOCOL_UNSPECIFIED\x10\x00\x12\x10\n" +
-	"\fPROTOCOL_TCP\x10\x01\x12\x10\n" +
-	"\fPROTOCOL_UDP\x10\x02\x12\x11\n" +
-	"\rPROTOCOL_SCTP\x10\x03*\xbb\x01\n" +
-	"\rSandboxStatus\x12\x1e\n" +
-	"\x1aSANDBOX_STATUS_UNSPECIFIED\x10\x00\x12\x1b\n" +
-	"\x17SANDBOX_STATUS_STARTING\x10\x01\x12\x1a\n" +
-	"\x16SANDBOX_STATUS_RUNNING\x10\x02\x12\x1b\n" +
-	"\x17SANDBOX_STATUS_STOPPING\x10\x03\x12\x1a\n" +
-	"\x16SANDBOX_STATUS_STOPPED\x10\x04\x12\x18\n" +
-	"\x14SANDBOX_STATUS_ERROR\x10\x052\x84\x05\n" +
+	"\x06stderr\x18\x02 \x01(\tR\x06stderr2\xa0\x03\n" +
 	"\x0eSandboxService\x12Q\n" +
 	"\fStartSandbox\x12\x1f.sandbox.v1.StartSandboxRequest\x1a .sandbox.v1.StartSandboxResponse\x12N\n" +
 	"\vStopSandbox\x12\x1e.sandbox.v1.StopSandboxRequest\x1a\x1f.sandbox.v1.StopSandboxResponse\x12K\n" +
 	"\n" +
 	"GetSandbox\x12\x1d.sandbox.v1.GetSandboxRequest\x1a\x1e.sandbox.v1.GetSandboxResponse\x12N\n" +
 	"\vListSandbox\x12\x1e.sandbox.v1.ListSandboxRequest\x1a\x1f.sandbox.v1.ListSandboxResponse\x12N\n" +
-	"\vSendCommand\x12\x1e.sandbox.v1.SendCommandRequest\x1a\x1f.sandbox.v1.SendCommandResponse\x12E\n" +
-	"\bOpenPort\x12\x1b.sandbox.v1.OpenPortRequest\x1a\x1c.sandbox.v1.OpenPortResponse\x12H\n" +
-	"\tClosePort\x12\x1c.sandbox.v1.ClosePortRequest\x1a\x1d.sandbox.v1.ClosePortResponse\x12Q\n" +
-	"\fListOpenPort\x12\x1f.sandbox.v1.ListOpenPortRequest\x1a .sandbox.v1.ListOpenPortResponseB\x85\x01\n" +
+	"\vSendCommand\x12\x1e.sandbox.v1.SendCommandRequest\x1a\x1f.sandbox.v1.SendCommandResponseB\x85\x01\n" +
 	"\x0ecom.sandbox.v1B\fSandboxProtoP\x01Z\x1ce2b/gen/sandbox/v1;sandboxv1\xa2\x02\x03SXX\xaa\x02\n" +
 	"Sandbox.V1\xca\x02\n" +
 	"Sandbox\\V1\xe2\x02\x16Sandbox\\V1\\GPBMetadata\xea\x02\vSandbox::V1b\x06proto3"
@@ -1195,68 +581,45 @@ func file_sandbox_v1_sandbox_proto_rawDescGZIP() []byte {
 	return file_sandbox_v1_sandbox_proto_rawDescData
 }
 
-var file_sandbox_v1_sandbox_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_sandbox_v1_sandbox_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_sandbox_v1_sandbox_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_sandbox_v1_sandbox_proto_goTypes = []any{
-	(Protocol)(0),                // 0: sandbox.v1.Protocol
-	(SandboxStatus)(0),           // 1: sandbox.v1.SandboxStatus
-	(*StartSandboxRequest)(nil),  // 2: sandbox.v1.StartSandboxRequest
-	(*StartSandboxResponse)(nil), // 3: sandbox.v1.StartSandboxResponse
-	(*GetSandboxRequest)(nil),    // 4: sandbox.v1.GetSandboxRequest
-	(*GetSandboxResponse)(nil),   // 5: sandbox.v1.GetSandboxResponse
-	(*StopSandboxRequest)(nil),   // 6: sandbox.v1.StopSandboxRequest
-	(*StopSandboxResponse)(nil),  // 7: sandbox.v1.StopSandboxResponse
-	(*ListSandboxRequest)(nil),   // 8: sandbox.v1.ListSandboxRequest
-	(*ListSandboxResponse)(nil),  // 9: sandbox.v1.ListSandboxResponse
-	(*SendCommandRequest)(nil),   // 10: sandbox.v1.SendCommandRequest
-	(*SendCommandResponse)(nil),  // 11: sandbox.v1.SendCommandResponse
-	(*OpenPortRequest)(nil),      // 12: sandbox.v1.OpenPortRequest
-	(*OpenPortResponse)(nil),     // 13: sandbox.v1.OpenPortResponse
-	(*ClosePortRequest)(nil),     // 14: sandbox.v1.ClosePortRequest
-	(*ClosePortResponse)(nil),    // 15: sandbox.v1.ClosePortResponse
-	(*ListOpenPortRequest)(nil),  // 16: sandbox.v1.ListOpenPortRequest
-	(*ListOpenPortResponse)(nil), // 17: sandbox.v1.ListOpenPortResponse
-	(*PortInfo)(nil),             // 18: sandbox.v1.PortInfo
-	(*SandboxInfo)(nil),          // 19: sandbox.v1.SandboxInfo
-	(*Specification)(nil),        // 20: sandbox.v1.Specification
-	nil,                          // 21: sandbox.v1.StartSandboxRequest.EnvEntry
+	(*StartSandboxRequest)(nil),  // 0: sandbox.v1.StartSandboxRequest
+	(*StartSandboxResponse)(nil), // 1: sandbox.v1.StartSandboxResponse
+	(*GetSandboxRequest)(nil),    // 2: sandbox.v1.GetSandboxRequest
+	(*GetSandboxResponse)(nil),   // 3: sandbox.v1.GetSandboxResponse
+	(*StopSandboxRequest)(nil),   // 4: sandbox.v1.StopSandboxRequest
+	(*StopSandboxResponse)(nil),  // 5: sandbox.v1.StopSandboxResponse
+	(*ListSandboxRequest)(nil),   // 6: sandbox.v1.ListSandboxRequest
+	(*ListSandboxResponse)(nil),  // 7: sandbox.v1.ListSandboxResponse
+	(*SendCommandRequest)(nil),   // 8: sandbox.v1.SendCommandRequest
+	(*SendCommandResponse)(nil),  // 9: sandbox.v1.SendCommandResponse
+	nil,                          // 10: sandbox.v1.StartSandboxRequest.EnvEntry
+	(*v1.Specification)(nil),     // 11: common.v1.Specification
+	(*v1.SandboxInfo)(nil),       // 12: common.v1.SandboxInfo
 }
 var file_sandbox_v1_sandbox_proto_depIdxs = []int32{
-	20, // 0: sandbox.v1.StartSandboxRequest.requirement:type_name -> sandbox.v1.Specification
-	21, // 1: sandbox.v1.StartSandboxRequest.env:type_name -> sandbox.v1.StartSandboxRequest.EnvEntry
-	19, // 2: sandbox.v1.StartSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
-	19, // 3: sandbox.v1.GetSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
-	20, // 4: sandbox.v1.GetSandboxResponse.resource:type_name -> sandbox.v1.Specification
-	19, // 5: sandbox.v1.StopSandboxResponse.sandbox:type_name -> sandbox.v1.SandboxInfo
-	19, // 6: sandbox.v1.ListSandboxResponse.sandboxs:type_name -> sandbox.v1.SandboxInfo
-	18, // 7: sandbox.v1.OpenPortRequest.port:type_name -> sandbox.v1.PortInfo
-	18, // 8: sandbox.v1.OpenPortResponse.port:type_name -> sandbox.v1.PortInfo
-	18, // 9: sandbox.v1.ClosePortRequest.port:type_name -> sandbox.v1.PortInfo
-	18, // 10: sandbox.v1.ClosePortResponse.port:type_name -> sandbox.v1.PortInfo
-	18, // 11: sandbox.v1.ListOpenPortResponse.ports:type_name -> sandbox.v1.PortInfo
-	0,  // 12: sandbox.v1.PortInfo.protocol:type_name -> sandbox.v1.Protocol
-	1,  // 13: sandbox.v1.SandboxInfo.status:type_name -> sandbox.v1.SandboxStatus
-	2,  // 14: sandbox.v1.SandboxService.StartSandbox:input_type -> sandbox.v1.StartSandboxRequest
-	6,  // 15: sandbox.v1.SandboxService.StopSandbox:input_type -> sandbox.v1.StopSandboxRequest
-	4,  // 16: sandbox.v1.SandboxService.GetSandbox:input_type -> sandbox.v1.GetSandboxRequest
-	8,  // 17: sandbox.v1.SandboxService.ListSandbox:input_type -> sandbox.v1.ListSandboxRequest
-	10, // 18: sandbox.v1.SandboxService.SendCommand:input_type -> sandbox.v1.SendCommandRequest
-	12, // 19: sandbox.v1.SandboxService.OpenPort:input_type -> sandbox.v1.OpenPortRequest
-	14, // 20: sandbox.v1.SandboxService.ClosePort:input_type -> sandbox.v1.ClosePortRequest
-	16, // 21: sandbox.v1.SandboxService.ListOpenPort:input_type -> sandbox.v1.ListOpenPortRequest
-	3,  // 22: sandbox.v1.SandboxService.StartSandbox:output_type -> sandbox.v1.StartSandboxResponse
-	7,  // 23: sandbox.v1.SandboxService.StopSandbox:output_type -> sandbox.v1.StopSandboxResponse
-	5,  // 24: sandbox.v1.SandboxService.GetSandbox:output_type -> sandbox.v1.GetSandboxResponse
-	9,  // 25: sandbox.v1.SandboxService.ListSandbox:output_type -> sandbox.v1.ListSandboxResponse
-	11, // 26: sandbox.v1.SandboxService.SendCommand:output_type -> sandbox.v1.SendCommandResponse
-	13, // 27: sandbox.v1.SandboxService.OpenPort:output_type -> sandbox.v1.OpenPortResponse
-	15, // 28: sandbox.v1.SandboxService.ClosePort:output_type -> sandbox.v1.ClosePortResponse
-	17, // 29: sandbox.v1.SandboxService.ListOpenPort:output_type -> sandbox.v1.ListOpenPortResponse
-	22, // [22:30] is the sub-list for method output_type
-	14, // [14:22] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	11, // 0: sandbox.v1.StartSandboxRequest.requirement:type_name -> common.v1.Specification
+	10, // 1: sandbox.v1.StartSandboxRequest.env:type_name -> sandbox.v1.StartSandboxRequest.EnvEntry
+	12, // 2: sandbox.v1.StartSandboxResponse.sandbox:type_name -> common.v1.SandboxInfo
+	12, // 3: sandbox.v1.GetSandboxResponse.sandbox:type_name -> common.v1.SandboxInfo
+	11, // 4: sandbox.v1.GetSandboxResponse.resource:type_name -> common.v1.Specification
+	12, // 5: sandbox.v1.StopSandboxResponse.sandbox:type_name -> common.v1.SandboxInfo
+	12, // 6: sandbox.v1.ListSandboxResponse.sandboxs:type_name -> common.v1.SandboxInfo
+	0,  // 7: sandbox.v1.SandboxService.StartSandbox:input_type -> sandbox.v1.StartSandboxRequest
+	4,  // 8: sandbox.v1.SandboxService.StopSandbox:input_type -> sandbox.v1.StopSandboxRequest
+	2,  // 9: sandbox.v1.SandboxService.GetSandbox:input_type -> sandbox.v1.GetSandboxRequest
+	6,  // 10: sandbox.v1.SandboxService.ListSandbox:input_type -> sandbox.v1.ListSandboxRequest
+	8,  // 11: sandbox.v1.SandboxService.SendCommand:input_type -> sandbox.v1.SendCommandRequest
+	1,  // 12: sandbox.v1.SandboxService.StartSandbox:output_type -> sandbox.v1.StartSandboxResponse
+	5,  // 13: sandbox.v1.SandboxService.StopSandbox:output_type -> sandbox.v1.StopSandboxResponse
+	3,  // 14: sandbox.v1.SandboxService.GetSandbox:output_type -> sandbox.v1.GetSandboxResponse
+	7,  // 15: sandbox.v1.SandboxService.ListSandbox:output_type -> sandbox.v1.ListSandboxResponse
+	9,  // 16: sandbox.v1.SandboxService.SendCommand:output_type -> sandbox.v1.SendCommandResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_sandbox_v1_sandbox_proto_init() }
@@ -1269,14 +632,13 @@ func file_sandbox_v1_sandbox_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sandbox_v1_sandbox_proto_rawDesc), len(file_sandbox_v1_sandbox_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   20,
+			NumEnums:      0,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_sandbox_v1_sandbox_proto_goTypes,
 		DependencyIndexes: file_sandbox_v1_sandbox_proto_depIdxs,
-		EnumInfos:         file_sandbox_v1_sandbox_proto_enumTypes,
 		MessageInfos:      file_sandbox_v1_sandbox_proto_msgTypes,
 	}.Build()
 	File_sandbox_v1_sandbox_proto = out.File

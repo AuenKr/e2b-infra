@@ -5,6 +5,7 @@ import (
 )
 
 type Route struct {
-	Path    string
-	Handler http.Handler
+	ServiceName string
+	Path        string
+	Handler     http.Handler
 }
