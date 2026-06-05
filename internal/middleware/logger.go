@@ -20,14 +20,16 @@ func NewLoggerInterceptor(logger *zap.Logger) connect.Interceptor {
 				zap.Duration("duration", time.Since(startedAt)),
 			}
 			if err != nil {
-				logger.Error("rpc request failed", append(fields,
+				logger.Error("rpc request failed", append(
+					fields,
 					zap.String("code", connect.CodeOf(err).String()),
 					zap.Error(err),
 				)...)
 				return res, err
 			}
 
-			logger.Info("rpc request completed", append(fields,
+			logger.Info("rpc request completed", append(
+				fields,
 				zap.String("code", connect.CodeOf(err).String()),
 			)...)
 			return res, nil

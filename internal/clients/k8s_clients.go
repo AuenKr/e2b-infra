@@ -1,6 +1,8 @@
-package config
+package clients
 
 import (
+	"e2b/pkg/config"
+
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
@@ -11,7 +13,7 @@ import (
 
 type K8sClientParams struct {
 	fx.In
-	Config Config
+	Config config.Config
 	Logger *zap.Logger
 }
 
