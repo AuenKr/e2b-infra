@@ -11,7 +11,9 @@ import (
 )
 
 type Config struct {
-	Mode          string
+	Mode             string
+	ReflectionEnable bool
+
 	Port          int
 	K8sConfigPath string
 	K8sNamespace  string
@@ -57,8 +59,15 @@ func NewConfig() Config {
 		panic("Domain Value Required")
 	}
 
+	reflectionEnable := true
+	reflectionEnvEnable := getEnv("REFLECTION_ENABLE", "true")
+	if reflectionEnvEnable == "false" {
+		reflectionEnable = false
+	}
+
 	return Config{
 		Port:                port,
+		ReflectionEnable:    reflectionEnable,
 		Mode:                Mode,
 		K8sConfigPath:       K8sConfigPath,
 		K8sNamespace:        K8sNamespace,

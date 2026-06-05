@@ -16,7 +16,7 @@ spec:
       serviceAccountName: e2b
       containers:
         - name: e2b-clone
-          image: auenkr/e2b-clone
+          image: auenkr/e2b-clone@sha256:1b2b04bad6056bdb06d5fd34b1f5f273ed2d9cef1860c5529452e8131627f23f
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -41,6 +41,7 @@ metadata:
   name: e2b
   namespace: e2b-system
 spec:
+  type: LoadBalancer
   selector:
     app: e2b
   ports:

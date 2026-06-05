@@ -6,7 +6,7 @@ import (
 
 	commonv1 "e2b/gen/common/v1"
 	portmangerv1 "e2b/gen/port_manger/v1"
-	"e2b/internal/sandbox"
+	"e2b/internal/utils"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,14 +24,14 @@ func (s *PortMangerServer) OpenPort(ctx context.Context, req *portmangerv1.OpenP
 	}
 
 	for _, port := range service.Spec.Ports {
-		if port.Port == int32(req.Port.PortNumber) && port.Protocol == sandbox.K8sProtocolAdapter(req.Port.Protocol) {
+		if port.Port == int32(req.Port.PortNumber) && port.Protocol == utils.K8sProtocolAdapter(req.Port.Protocol) {
 			return nil, errors.New("already opened")
 		}
 	}
 
 	newPort := corev1.ServicePort{
-		Name:     sandbox.GetPortName(req.Port),
-		Protocol: sandbox.K8sProtocolAdapter(req.Port.Protocol),
+		Name:     getPortName(req.Port),
+		Protocol: utils.K8sProtocolAdapter(req.Port.Protocol),
 		Port:     int32(req.Port.PortNumber),
 	}
 
@@ -46,7 +46,11 @@ func (s *PortMangerServer) OpenPort(ctx context.Context, req *portmangerv1.OpenP
 		return nil, err
 	}
 
-	portHostname := sandbox.GetHTTPRoute(req.Port, s.Config.Domain)
+	portHostname := getHTTPRoute(httpRouteParams{
+		containerID: req.GetId(),
+		domain:      s.Config.Domain,
+		port:        req.Port,
+	})
 	for _, hostname := range httpRoutes.Spec.Hostnames {
 		if string(hostname) == portHostname {
 			return nil, errors.New("already registered http route")
@@ -54,7 +58,7 @@ func (s *PortMangerServer) OpenPort(ctx context.Context, req *portmangerv1.OpenP
 	}
 	httpRoutes.Spec.Hostnames = append(httpRoutes.Spec.Hostnames, gatewayapiv1.Hostname(portHostname))
 
-	ruleName := gatewayapiv1.SectionName(sandbox.GetPortName(req.Port))
+	ruleName := gatewayapiv1.SectionName(getPortName(req.Port))
 	for _, rule := range httpRoutes.Spec.Rules {
 		if rule.Name != nil && *rule.Name == ruleName {
 			return nil, errors.New("already defined http route rule")
@@ -97,7 +101,11 @@ func (s *PortMangerServer) OpenPort(ctx context.Context, req *portmangerv1.OpenP
 		Port: &commonv1.PortInfo{
 			PortNumber: req.Port.PortNumber,
 			Protocol:   req.Port.Protocol,
-			Hostname:   sandbox.GetHTTPRoute(req.Port, s.Config.Domain),
+			Hostname: getHTTPRoute(httpRouteParams{
+				containerID: req.GetId(),
+				domain:      s.Config.Domain,
+				port:        req.Port,
+			}),
 		},
 	}, nil
 }
@@ -115,7 +123,7 @@ func (s *PortMangerServer) ClosePort(ctx context.Context, req *portmangerv1.Clos
 
 	newPorts := make([]corev1.ServicePort, 0, len(service.Spec.Ports))
 	for _, port := range service.Spec.Ports {
-		if port.Port == int32(req.Port.PortNumber) && port.Protocol == sandbox.K8sProtocolAdapter(req.Port.Protocol) {
+		if port.Port == int32(req.Port.PortNumber) && port.Protocol == utils.K8sProtocolAdapter(req.Port.Protocol) {
 			continue
 		}
 		newPorts = append(newPorts, port)
@@ -136,7 +144,11 @@ func (s *PortMangerServer) ClosePort(ctx context.Context, req *portmangerv1.Clos
 	}
 
 	hostnames := make([]gatewayapiv1.Hostname, 0, len(httpRoutes.Spec.Hostnames))
-	route := sandbox.GetHTTPRoute(req.Port, s.Config.Domain)
+	route := getHTTPRoute(httpRouteParams{
+		containerID: req.GetId(),
+		domain:      s.Config.Domain,
+		port:        req.Port,
+	})
 	for _, host := range httpRoutes.Spec.Hostnames {
 		if string(host) == route {
 			continue
@@ -148,7 +160,7 @@ func (s *PortMangerServer) ClosePort(ctx context.Context, req *portmangerv1.Clos
 	}
 
 	rules := make([]gatewayapiv1.HTTPRouteRule, 0, len(httpRoutes.Spec.Rules))
-	ruleName := gatewayapiv1.SectionName(sandbox.GetPortName(req.Port))
+	ruleName := gatewayapiv1.SectionName(getPortName(req.Port))
 	for _, rule := range httpRoutes.Spec.Rules {
 		if rule.Name != nil && *rule.Name == ruleName {
 			continue
@@ -171,7 +183,11 @@ func (s *PortMangerServer) ClosePort(ctx context.Context, req *portmangerv1.Clos
 		Port: &commonv1.PortInfo{
 			PortNumber: req.Port.PortNumber,
 			Protocol:   req.Port.Protocol,
-			Hostname:   sandbox.GetHTTPRoute(req.Port, s.Config.Domain),
+			Hostname: getHTTPRoute(httpRouteParams{
+				containerID: req.GetId(),
+				domain:      s.Config.Domain,
+				port:        req.Port,
+			}),
 		},
 	}, nil
 }
@@ -190,9 +206,13 @@ func (s *PortMangerServer) ListOpenPort(ctx context.Context, req *portmangerv1.L
 	for i, port := range k8sPod.Spec.Ports {
 		port := commonv1.PortInfo{
 			PortNumber: uint32(port.Port),
-			Protocol:   sandbox.SandboxProtocolAdapter(port.Protocol),
+			Protocol:   utils.SandboxProtocolAdapter(port.Protocol),
 		}
-		hostname := sandbox.GetHTTPRoute(&port, s.Config.Domain)
+		hostname := getHTTPRoute(httpRouteParams{
+			containerID: req.GetId(),
+			domain:      s.Config.Domain,
+			port:        &port,
+		})
 		port.Hostname = hostname
 		ports[i] = &port
 	}

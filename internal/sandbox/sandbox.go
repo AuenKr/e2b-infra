@@ -2,6 +2,7 @@ package sandbox
 
 import (
 	"context"
+	"e2b/internal/utils"
 	"fmt"
 	"strings"
 
@@ -97,7 +98,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 			Ports: []corev1.ServicePort{
 				{
 					Name:     config.INITIAL_PORT_NAME,
-					Protocol: K8sProtocolAdapter(config.INITIAL_PORT_PROTOCOL),
+					Protocol: utils.K8sProtocolAdapter(config.INITIAL_PORT_PROTOCOL),
 					Port:     config.INITIAL_PORT,
 				},
 			},
@@ -133,7 +134,7 @@ func (s *SandboxServer) StartSandbox(ctx context.Context, req *sandboxv1.StartSa
 	return &sandboxv1.StartSandboxResponse{
 		Sandbox: &commonv1.SandboxInfo{
 			Id:     podInfo.Name,
-			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
+			Status: podPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 		},
 	}, nil
 }
@@ -189,7 +190,7 @@ func (s *SandboxServer) GetSandbox(ctx context.Context, req *sandboxv1.GetSandbo
 	return &sandboxv1.GetSandboxResponse{
 		Sandbox: &commonv1.SandboxInfo{
 			Id:     podInfo.Name,
-			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
+			Status: podPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 		},
 		Resource: &commonv1.Specification{
 			Cpu:    uint32(cpuMilli),
@@ -211,7 +212,7 @@ func (s *SandboxServer) ListSandbox(ctx context.Context, req *sandboxv1.ListSand
 	for i, podInfo := range podsInfo.Items {
 		sandboxs[i] = &commonv1.SandboxInfo{
 			Id:     podInfo.Name,
-			Status: PodPhaseToSandboxStateAdapter(podInfo.Status.Phase),
+			Status: podPhaseToSandboxStateAdapter(podInfo.Status.Phase),
 		}
 	}
 

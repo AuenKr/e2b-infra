@@ -1,0 +1,37 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: e2b-route
+  namespace: e2b-system
+spec:
+  parentRefs:
+    - name: sandbox-gateway
+  hostnames:
+    - e2b.auenkr.com
+  rules:
+    - backendRefs:
+        - name: e2b
+          port: 8080
+
+---
+# GKE Controller Health Check Policy
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: e2b-health-check
+  namespace: e2b-system
+spec:
+  default:
+    checkIntervalSec: 15
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: 8080
+        requestPath: /healthz
+    healthyThreshold: 1
+    timeoutSec: 10
+    unhealthyThreshold: 2
+  targetRef:
+    group: ""
+    kind: Service
+    name: e2b

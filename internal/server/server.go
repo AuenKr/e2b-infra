@@ -20,12 +20,16 @@ type RegisterRoutesParams struct {
 
 func NewServerMux(in RegisterRoutesParams) *http.ServeMux {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	for _, r := range in.Routers {
 		in.Logger.Info("Registering route", zap.String("path", r.Path))
 		mux.Handle(r.Path, r.Handler)
 	}
 
-	if in.Config.Mode == "dev" {
+	if in.Config.ReflectionEnable {
 		for _, r := range in.ReflectionRoutes {
 			in.Logger.Info("Registering reflection route", zap.String("path", r.Path))
 			mux.Handle(r.Path, r.Handler)

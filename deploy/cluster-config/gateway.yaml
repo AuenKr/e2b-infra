@@ -4,7 +4,7 @@ metadata:
   name: sandbox-gateway
   namespace: e2b-system
 spec:
-  gatewayClassName: istio
+  gatewayClassName: gke-l7-global-external-managed
   listeners:
     - name: http
       hostname: "*.auenkr.com"

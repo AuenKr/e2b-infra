@@ -5,6 +5,7 @@ metadata:
   namespace: e2b-system
 data:
   MODE: prod
+  # REFLECTION_ENABLE: "true"
   PORT: "8080"
   K8S_NAMESPACE: sandbox
   K8S_GATEWAY: sandbox-gateway
