@@ -3,21 +3,39 @@ package port_manger
 import (
 	"e2b/gen/port_manger/v1/port_mangerv1connect"
 	"e2b/internal/middleware"
-	"e2b/internal/sandbox"
+	"e2b/pkg/config"
 	"e2b/pkg/server"
 
 	"connectrpc.com/connect"
 	"connectrpc.com/validate"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"k8s.io/client-go/kubernetes"
+	gatewayclientset "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
 )
 
 type PortMangerServer struct {
-	*sandbox.SandboxServer
+	Config        config.Config
+	K8sClient     *kubernetes.Clientset
+	GatewayClient *gatewayclientset.Clientset
+	Logger        *zap.Logger
 }
 
-func NewPortMangerServer(server *sandbox.SandboxServer) *PortMangerServer {
-	return &PortMangerServer{SandboxServer: server}
+type PortMangerServerParams struct {
+	fx.In
+	Config        config.Config
+	K8sClient     *kubernetes.Clientset
+	GatewayClient *gatewayclientset.Clientset
+	Logger        *zap.Logger
+}
+
+func NewPortMangerServer(in PortMangerServerParams) *PortMangerServer {
+	return &PortMangerServer{
+		Config:        in.Config,
+		K8sClient:     in.K8sClient,
+		GatewayClient: in.GatewayClient,
+		Logger:        in.Logger,
+	}
 }
 
 var _ port_mangerv1connect.PortMangerServiceHandler = (*PortMangerServer)(nil)

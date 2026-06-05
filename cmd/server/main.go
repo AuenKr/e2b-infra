@@ -21,19 +21,19 @@ func main() {
 		// Decorator inside the module does not work
 		// Need to be present at root level of project
 
-		fx.Invoke(StartHTTPServer),
+		fx.Invoke(StartServer),
 	)
 	app.Run()
 }
 
-type StartHTTPServerParams struct {
+type StartServerParams struct {
 	fx.In
 	LifeCycle fx.Lifecycle
 	Config    config.Config
 	Mux       *http.ServeMux
 }
 
-func StartHTTPServer(in StartHTTPServerParams) error {
+func StartServer(in StartServerParams) error {
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", in.Config.Port),
 		Handler: in.Mux,

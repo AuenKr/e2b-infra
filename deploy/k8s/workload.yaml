@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e2b
+  namespace: e2b-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: e2b
+  template:
+    metadata:
+      labels:
+        app: e2b
+    spec:
+      serviceAccountName: e2b
+      containers:
+        - name: e2b-clone
+          image: auenkr/e2b-clone
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: e2b-config
+            - secretRef:
+                name: e2b-secret
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: e2b
+  namespace: e2b-system
+spec:
+  selector:
+    app: e2b
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+      appProtocol: kubernetes.io/h2c

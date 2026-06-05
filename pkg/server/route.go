@@ -5,7 +5,9 @@ import (
 )
 
 type Route struct {
+	// ServiceName from generated protofile for registering in reflection
 	ServiceName string
-	Path        string
-	Handler     http.Handler
+	// Service handler path and handler
+	Path    string
+	Handler http.Handler
 }

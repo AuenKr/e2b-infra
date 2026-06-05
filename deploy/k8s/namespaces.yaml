@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  # For e2b-system deployment
+  name: e2b-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  # For sandbox deployment
+  name: sandbox

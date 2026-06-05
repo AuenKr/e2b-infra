@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: e2b-config
+  namespace: e2b-system
+data:
+  MODE: prod
+  PORT: "8080"
+  K8S_NAMESPACE: sandbox
+  K8S_GATEWAY: sandbox-gateway
+  K8S_GATEWAY_NAMESPACE: e2b-system
+  DOMAIN_NAME: auenkr.com
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: e2b-secret
+  namespace: e2b-system
+type: Opaque
+stringData: {}
