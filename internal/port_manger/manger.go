@@ -66,6 +66,8 @@ func (s *PortMangerServer) OpenPort(ctx context.Context, req *portmangerv1.OpenP
 	}
 
 	portNumber := gatewayapiv1.PortNumber(int32(req.Port.PortNumber))
+	pathType := gatewayapiv1.PathMatchPathPrefix
+	pathValue := "/"
 	rules := gatewayapiv1.HTTPRouteRule{
 		Name: &ruleName,
 		Matches: []gatewayapiv1.HTTPRouteMatch{
@@ -75,6 +77,10 @@ func (s *PortMangerServer) OpenPort(ctx context.Context, req *portmangerv1.OpenP
 						Name:  "Host",
 						Value: portHostname,
 					},
+				},
+				Path: &gatewayapiv1.HTTPPathMatch{
+					Type:  &pathType,
+					Value: &pathValue,
 				},
 			},
 		},
@@ -90,7 +96,7 @@ func (s *PortMangerServer) OpenPort(ctx context.Context, req *portmangerv1.OpenP
 		},
 	}
 
-	httpRoutes.Spec.Rules = append(httpRoutes.Spec.Rules, rules)
+	httpRoutes.Spec.Rules = append([]gatewayapiv1.HTTPRouteRule{rules}, httpRoutes.Spec.Rules...)
 
 	_, err = s.GatewayClient.GatewayV1beta1().HTTPRoutes(s.Config.K8sNamespace).Update(ctx, httpRoutes, metav1.UpdateOptions{})
 	if err != nil {

@@ -2,9 +2,10 @@ package sandbox
 
 import (
 	"context"
-	"e2b/internal/utils"
 	"fmt"
 	"strings"
+
+	"e2b/internal/utils"
 
 	commonv1 "e2b/gen/common/v1"
 	sandboxv1 "e2b/gen/sandbox/v1"
