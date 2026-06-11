@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package volume_manager.v1;
+
+service VolumeManagerService {
+  // CRUD for volume
+  // Create Volume and attach to specific location in container
+  rpc CreateVolume(CreateVolumeRequest) returns (CreateVolumeResponse);
+
+  rpc DeleteVolume(DeleteVolumeRequest) returns (DeleteVolumeResponse);
+  rpc GetVolume(GetVolumeRequest) returns (GetVolumeResponse);
+  rpc ListVolumes(ListVolumesRequest) returns (ListVolumesResponse);
+}
+
+message CreateVolumeRequest {}
+message CreateVolumeResponse {}
+
+message DeleteVolumeRequest {}
+message DeleteVolumeResponse {}
+
+message GetVolumeRequest {}
+message GetVolumeResponse {}
+
+message ListVolumesRequest {}
+message ListVolumesResponse {}

@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package file_manager.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+service FileManagerService {
+  // Common method for both file and dir
+  rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Move(MoveRequest) returns (MoveResponse);
+
+  // File specific methods
+  rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
+  rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
+
+  // Dir specific methods
+  rpc ListDir(ListDirRequest) returns (ListDirResponse);
+  rpc MakeDir(MakeDirRequest) returns (MakeDirResponse);
+}
+
+enum FileType {
+  FILE_TYPE_UNSPECIFIED = 0;
+  FILE_TYPE_FILE = 1;
+  FILE_TYPE_DIR = 2;
+}
+
+message GetInfoRequest {
+  FileType type = 1 [(buf.validate.field).enum.defined_only = true];
+  string path = 2 [(buf.validate.field).required = true];
+}
+
+message GetInfoResponse {
+  FileInfo info = 1;
+}
+
+message FileInfo {
+  string name = 1;
+  string path = 2;
+  FileType type = 3;
+  uint64 size = 4;
+  google.protobuf.Timestamp modified_time = 5;
+  string owner = 6;
+  string group = 7;
+  string permissions = 8;
+
+  // Optional fields
+  string symlink_target = 10;
+  google.protobuf.Timestamp created_time = 11;
+  google.protobuf.Timestamp accessed_time = 12;
+  string inode = 13;
+  string is_hidden = 14;
+  string mime_type = 15;
+  string extension = 16;
+
+  // Any other fields
+  map<string, string> metadata = 17;
+}
+
+message DeleteRequest {
+  FileType type = 1 [(buf.validate.field).enum.defined_only = true];
+  string path = 2 [(buf.validate.field).required = true];
+}
+
+message DeleteResponse {}
+
+message MoveRequest {
+  FileType type = 1 [(buf.validate.field).enum.defined_only = true];
+  string path = 2 [(buf.validate.field).required = true];
+  string new_path = 3 [(buf.validate.field).required = true];
+}
+
+message MoveResponse {}
+
+message ReadFileRequest {
+  string path = 1 [(buf.validate.field).required = true];
+  OutputType type = 2 [(buf.validate.field).required = true];
+}
+
+enum OutputType {
+  OUTPUT_TYPE_UNSPECIFIED = 0;
+  OUTPUT_TYPE_BYTE = 1;
+  // TODO: NOTE SUPPORTED IN THIS VERSION
+  OUTPUT_TYPE_STREAM = 3;
+}
+
+message ReadFileResponse {
+  FileInfo info = 1;
+  bytes content = 2;
+}
+
+message WriteFileRequest {
+  string path = 1 [(buf.validate.field).required = true];
+  bytes content = 2 [(buf.validate.field).required = true];
+}
+
+message WriteFileResponse {
+  FileInfo info = 1;
+}
+
+message ListDirRequest {
+  string path = 1 [(buf.validate.field).required = true];
+}
+
+message ListDirResponse {
+  repeated FileInfo files = 1;
+}
+
+message MakeDirRequest {
+  string path = 1 [(buf.validate.field).required = true];
+  string name = 2 [(buf.validate.field).required = true];
+}
+
+message MakeDirResponse {}
