@@ -16,8 +16,8 @@ spec:
       serviceAccountName: e2b
       containers:
         - name: e2b-clone
-          image: auenkr/e2b-clone@sha256:307bd2a6a5fe4cde5cf407f3b2c28beb46aed23888e4c90857d1d380e7bdd1ba
-          imagePullPolicy: IfNotPresent
+          image: auenkr/e2b-clone:latest
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: e2b-config
